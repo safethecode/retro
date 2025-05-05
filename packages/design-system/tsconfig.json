@@ -1,0 +1,19 @@
+{
+  "extends": "@heiglabs/typescript-config/react-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "esnext",
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "components",
+    "lib",
+    "hooks",
+    "providers",
+    "styles"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
