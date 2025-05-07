@@ -19,9 +19,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "^22.14.1",
-    "turbo": "^2.5.2",
+    "@types/node": "^22.15.14",
+    "turbo": "^2.5.3",
     "typescript": "5.8.2",
-    "ultracite": "^4.2.1"
+    "ultracite": "^4.2.4"
   }
 }
