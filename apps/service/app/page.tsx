@@ -1,5 +1,3 @@
-import { Button } from '@heiglabs/design-system/button';
-
 export default function Home() {
-  return <Button>Click me</Button>;
+  return <code>Hi, Heiglabs !</code>;
 }
