@@ -22,7 +22,7 @@
     "@types/node": "^22.15.18",
     "turbo": "^2.5.3",
     "typescript": "5.8.3",
-    "ultracite": "^4.2.4"
+    "ultracite": "^4.2.5"
   },
   "dependencies": {
     "lucide-react": "^0.510.0"

@@ -25,8 +25,8 @@ importers:
         specifier: 5.8.3
         version: 5.8.3
       ultracite:
-        specifier: ^4.2.4
-        version: 4.2.4
+        specifier: ^4.2.5
+        version: 4.2.5
 
   apps/documentation: {}
 
@@ -3024,8 +3024,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  ultracite@4.2.4:
-    resolution: {integrity: sha512-1dJfklnn8jGdzNAY770ogUN7rKqjFD/Rz6MYINYXMSuOdX5AXk8lI7ay8zCP3IYg4gX9gCkvuPE3XPaU/nD6bw==}
+  ultracite@4.2.5:
+    resolution: {integrity: sha512-WSJXX6dpSC+fhPQHAQn7jxtgxU9ueujQ3DZTVfzOUdmmvIm/i6v0/WlUyCDYZbzJup+pC8vUzi+XUJLRbN52HQ==}
     hasBin: true
 
   unbox-primitive@1.1.0:
@@ -6114,7 +6114,7 @@ snapshots:
 
   typescript@5.8.3: {}
 
-  ultracite@4.2.4:
+  ultracite@4.2.5:
     dependencies:
       commander: 12.1.0
 
