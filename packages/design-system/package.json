@@ -114,7 +114,7 @@
   },
   "devDependencies": {
     "@heiglabs/typescript-config": "workspace:*",
-    "@tailwindcss/postcss": "^4.1.6",
+    "@tailwindcss/postcss": "^4.1.8",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.15.18",
     "@types/react": "^19.1.4",
