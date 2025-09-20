@@ -1,5 +1,5 @@
 {
-  "extends": "@heiglabs/typescript-config/react-library.json",
+  "extends": "@pkg/typescript-config/react-library.json",
   "compilerOptions": {
     "outDir": "dist",
     "module": "esnext",

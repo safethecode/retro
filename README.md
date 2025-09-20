@@ -18,9 +18,9 @@ This Turborepo includes the following packages/apps:
 
 - `docs`: a [Next.js](https://nextjs.org/) app
 - `web`: another [Next.js](https://nextjs.org/) app
-- `@heiglabs/design-system`: a stub React component library shared by both `web` and `docs` applications
-- `@heiglabs/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@heiglabs/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- `@pkg/design-system`: a stub React component library shared by both `web` and `docs` applications
+- `@pkg/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
+- `@pkg/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
