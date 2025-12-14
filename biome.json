@@ -6,8 +6,13 @@
       "packages/design-system/components/ui/**",
       "packages/design-system/lib/**",
       "packages/design-system/hooks/**",
-      "apps/web/.next/**",
-      "apps/web/node_modules/**"
+      "packages/*/dist/**",
+      "apps/*/.next/**",
+      "apps/*/node_modules/**",
+      "**/node_modules/**",
+      "**/.turbo/**",
+      "**/public/**",
+      "**/.vercel/**"
     ]
   }
 }
