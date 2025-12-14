@@ -21,7 +21,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^15.5.9",
+    "@next/bundle-analyzer": "^16.0.10",
     "@pkg/design-system": "workspace:*",
     "@pkg/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",
