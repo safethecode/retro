@@ -1,5 +1,6 @@
 import { defaultMetadata } from '@/lib/metadata/default-metadata';
 import { pretendard } from '@/styles/fonts';
+import { Analytics } from '@vercel/analytics/react';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import '@/styles/globals.css';
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${pretendard.variable} antialiased`}>{children}</body>
+      <body className={`${pretendard.variable} antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

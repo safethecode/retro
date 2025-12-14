@@ -1,6 +1,6 @@
 {
-  "name": "frontend-workspace",
-  "version": "0.0.8",
+  "name": "retro-boilerplate",
+  "version": "0.1.0",
   "private": true,
   "engines": {
     "node": ">=18"
@@ -13,22 +13,16 @@
     "format": "ultracite format",
     "boundaries": "turbo boundaries",
     "bump-ui": "npx shadcn@latest add --all --overwrite -c packages/design-system",
-    "migrate": "cd packages/database && npx prisma format && npx prisma generate && npx prisma db push",
     "clean": "git clean -xdf node_modules",
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "^22.15.31",
-    "@types/react": "^19.1.4",
-    "@types/react-dom": "^19.1.5",
-    "turbo": "^2.5.4",
+    "@types/node": "^22.19.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "turbo": "^2.6.3",
     "typescript": "5.8.3",
-    "ultracite": "^4.2.8"
-  },
-  "dependencies": {
-    "lucide-react": "^0.510.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "ultracite": "^4.2.13"
   }
 }

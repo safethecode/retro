@@ -5,18 +5,16 @@
   "envMode": "loose",
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "test"],
+      "dependsOn": ["^build"],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
-        ".basehub/**",
-        "**/generated/**",
-        "storybook-static/**",
-        ".react-email/**"
+        "dist/**"
       ]
     },
-    "test": {
-      "dependsOn": ["^test"]
+    "check-types": {
+      "dependsOn": ["^check-types"],
+      "cache": true
     },
     "analyze": {
       "dependsOn": ["^analyze"]
@@ -24,10 +22,6 @@
     "dev": {
       "cache": false,
       "persistent": true
-    },
-    "translate": {
-      "dependsOn": ["^translate"],
-      "cache": false
     },
     "clean": {
       "cache": false
