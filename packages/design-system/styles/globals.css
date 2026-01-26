@@ -1,10 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 @source "../**/*.{ts,tsx}";
 
 @plugin '@tailwindcss/typography';
 
-/* Font preload */
 @layer base {
   @font-face {
     font-family: "Geist";
@@ -43,7 +44,6 @@
   }
 }
 
-/* Font variables */
 @layer base {
   :root {
     --font-geist-sans: "Geist", system-ui, -apple-system, BlinkMacSystemFont,
@@ -154,7 +154,6 @@
   }
 }
 
-/* This layer is added by shadcn/ui */
 @layer base {
   * {
     @reference border-border outline-ring/50;
@@ -164,7 +163,6 @@
   }
 }
 
-/* This layer is by next-forge */
 @layer base {
   ::after,
   ::before,
@@ -191,7 +189,6 @@
   }
 }
 
-/* Typography plugin */
 @utility prose {
   --tw-prose-body: var(--color-foreground);
   --tw-prose-headings: var(--color-foreground);
@@ -225,4 +222,24 @@
   --tw-prose-invert-pre-bg: var(--color-background);
   --tw-prose-invert-th-borders: var(--color-border);
   --tw-prose-invert-td-borders: var(--color-border);
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
