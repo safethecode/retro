@@ -1,0 +1,35 @@
+import { redirect } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
+import { SignOutButton } from "@/features/auth";
+import { auth } from "@/lib/auth";
+
+type DashboardPageProps = {
+	params: Promise<{ locale: string }>;
+};
+
+export default async function DashboardPage({ params }: DashboardPageProps) {
+	const { locale } = await params;
+	setRequestLocale(locale);
+
+	const session = await auth();
+
+	if (!session?.user) {
+		redirect("/login");
+	}
+
+	return <DashboardContent name={session.user.name ?? "User"} />;
+}
+
+function DashboardContent({ name }: { name: string }) {
+	const t = useTranslations("dashboard");
+
+	return (
+		<main className="flex min-h-screen flex-col items-center justify-center p-8">
+			<h1 className="text-2xl font-bold">{t("welcome", { name })}</h1>
+			<div className="mt-4">
+				<SignOutButton className="rounded-md bg-black px-4 py-2 text-white" />
+			</div>
+		</main>
+	);
+}
