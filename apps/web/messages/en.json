@@ -1,0 +1,44 @@
+{
+	"common": {
+		"loading": "Loading...",
+		"error": "An error occurred",
+		"retry": "Retry",
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"back": "Back",
+		"next": "Next",
+		"previous": "Previous",
+		"search": "Search",
+		"close": "Close"
+	},
+	"auth": {
+		"login": "Login",
+		"logout": "Logout",
+		"register": "Register",
+		"email": "Email",
+		"password": "Password",
+		"confirmPassword": "Confirm Password",
+		"name": "Name",
+		"forgotPassword": "Forgot password?",
+		"noAccount": "Don't have an account?",
+		"hasAccount": "Already have an account?",
+		"signInWithGoogle": "Continue with Google",
+		"or": "or"
+	},
+	"home": {
+		"title": "Home",
+		"welcome": "Welcome"
+	},
+	"dashboard": {
+		"title": "Dashboard",
+		"welcome": "Hello, {name}"
+	},
+	"errors": {
+		"notFound": "Page not found",
+		"unauthorized": "Login required",
+		"forbidden": "Access denied",
+		"serverError": "Server error occurred"
+	}
+}
