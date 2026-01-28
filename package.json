@@ -1,28 +1,28 @@
 {
-  "name": "retro-boilerplate",
-  "version": "0.1.0",
-  "private": true,
-  "engines": {
-    "node": ">=18"
-  },
-  "packageManager": "pnpm@9.0.0",
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "ultracite lint",
-    "format": "ultracite format",
-    "boundaries": "turbo boundaries",
-    "bump-ui": "npx shadcn@latest add --all --overwrite -c packages/design-system",
-    "clean": "git clean -xdf node_modules",
-    "check-types": "turbo run check-types"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.3.8",
-    "@types/node": "^22.19.3",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "turbo": "^2.6.3",
-    "typescript": "5.9.3",
-    "ultracite": "^4.2.13"
-  }
+	"name": "retro-boilerplate",
+	"version": "0.1.0",
+	"private": true,
+	"engines": {
+		"node": ">=18"
+	},
+	"packageManager": "pnpm@9.0.0",
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"lint": "ultracite check",
+		"format": "ultracite fix",
+		"boundaries": "turbo boundaries",
+		"bump-ui": "npx shadcn@latest add --all --overwrite -c packages/design-system",
+		"clean": "git clean -xdf node_modules",
+		"check-types": "turbo run check-types"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.13",
+		"@types/node": "^22.19.3",
+		"@types/react": "^19.2.7",
+		"@types/react-dom": "^19.2.3",
+		"turbo": "^2.6.3",
+		"typescript": "5.9.3",
+		"ultracite": "^7.1.1"
+	}
 }
