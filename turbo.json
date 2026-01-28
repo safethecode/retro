@@ -1,33 +1,41 @@
 {
-  "$schema": "https://turborepo.com/schema.json",
-  "globalDependencies": ["**/.env.*local"],
-  "ui": "tui",
-  "envMode": "loose",
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**"
-      ]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"],
-      "cache": true
-    },
-    "analyze": {
-      "dependsOn": ["^analyze"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "clean": {
-      "cache": false
-    },
-    "//#clean": {
-      "cache": false
-    }
-  }
+	"$schema": "https://turborepo.com/schema.json",
+	"globalDependencies": ["**/.env.*local"],
+	"ui": "tui",
+	"envMode": "loose",
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": [".next/**", "!.next/cache/**", "dist/**"]
+		},
+		"check-types": {
+			"dependsOn": ["^check-types"],
+			"cache": true
+		},
+		"analyze": {
+			"dependsOn": ["^analyze"]
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"test": {
+			"dependsOn": ["^build"],
+			"cache": true
+		},
+		"test:coverage": {
+			"dependsOn": ["^build"],
+			"cache": true
+		},
+		"test:e2e": {
+			"dependsOn": ["^build"],
+			"cache": false
+		},
+		"clean": {
+			"cache": false
+		},
+		"//#clean": {
+			"cache": false
+		}
+	}
 }
