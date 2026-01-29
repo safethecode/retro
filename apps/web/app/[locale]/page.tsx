@@ -1,5 +1,4 @@
-import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LanguageSwitcher } from "@/shared/components/language-switcher";
 
 type HomePageProps = {
@@ -10,11 +9,7 @@ export default async function HomePage({ params }: HomePageProps) {
 	const { locale } = await params;
 	setRequestLocale(locale);
 
-	return <HomeContent />;
-}
-
-function HomeContent() {
-	const t = useTranslations("home");
+	const t = await getTranslations("home");
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center p-8">

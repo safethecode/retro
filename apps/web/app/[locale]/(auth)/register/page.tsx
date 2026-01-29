@@ -1,5 +1,4 @@
-import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n";
 
 type RegisterPageProps = {
@@ -10,11 +9,7 @@ export default async function RegisterPage({ params }: RegisterPageProps) {
 	const { locale } = await params;
 	setRequestLocale(locale);
 
-	return <RegisterContent />;
-}
-
-function RegisterContent() {
-	const t = useTranslations("auth");
+	const t = await getTranslations("auth");
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center p-8">

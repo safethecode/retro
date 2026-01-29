@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SignOutButton } from "@/features/auth";
 import { auth } from "@/lib/auth";
 
@@ -18,11 +17,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 		redirect("/login");
 	}
 
-	return <DashboardContent name={session.user.name ?? "User"} />;
-}
-
-function DashboardContent({ name }: { name: string }) {
-	const t = useTranslations("dashboard");
+	const t = await getTranslations("dashboard");
+	const name = session.user.name ?? "User";
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center p-8">
