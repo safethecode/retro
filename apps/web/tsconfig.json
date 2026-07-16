@@ -1,5 +1,5 @@
 {
-	"extends": "@pkg/typescript-config/nextjs.json",
+	"extends": "@repo/typescript-config/nextjs.json",
 	"compilerOptions": {
 		"declaration": false,
 		"declarationMap": false,
@@ -9,7 +9,7 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./*"]
+			"@/*": ["./src/*"]
 		}
 	},
 	"include": [

@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { LanguageSwitcher } from "@/shared/components/language-switcher";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 type HomePageProps = {
 	params: Promise<{ locale: string }>;

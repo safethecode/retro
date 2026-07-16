@@ -1,9 +1,4 @@
-import {
-	create,
-	type StateCreator,
-	type StoreApi,
-	type UseBoundStore,
-} from "zustand";
+import { create, type StateCreator, type StoreApi, type UseBoundStore } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
 type StoreOptions = {

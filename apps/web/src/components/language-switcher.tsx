@@ -1,13 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import {
-	type Locale,
-	localeNames,
-	locales,
-	usePathname,
-	useRouter,
-} from "@/i18n";
+import { type Locale, localeNames, locales, usePathname, useRouter } from "@/i18n";
 
 export function LanguageSwitcher() {
 	const locale = useLocale();
@@ -26,9 +20,7 @@ export function LanguageSwitcher() {
 					type="button"
 					onClick={() => handleChange(l)}
 					className={`px-2 py-1 text-sm rounded ${
-						locale === l
-							? "bg-black text-white"
-							: "bg-gray-100 text-gray-700 hover:bg-gray-200"
+						locale === l ? "bg-black text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
 					}`}
 					disabled={locale === l}
 				>

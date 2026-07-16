@@ -13,10 +13,7 @@ export function generateStaticParams() {
 	return routing.locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({
-	children,
-	params,
-}: LocaleLayoutProps) {
+export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
 	const { locale } = await params;
 
 	if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
@@ -27,9 +24,5 @@ export default async function LocaleLayout({
 
 	const messages = await getMessages();
 
-	return (
-		<NextIntlClientProvider messages={messages}>
-			{children}
-		</NextIntlClientProvider>
-	);
+	return <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>;
 }
