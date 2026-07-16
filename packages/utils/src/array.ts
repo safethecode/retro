@@ -47,11 +47,7 @@ export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
 	);
 }
 
-export function sortBy<T>(
-	array: T[],
-	key: keyof T,
-	order: "asc" | "desc" = "asc",
-): T[] {
+export function sortBy<T>(array: T[], key: keyof T, order: "asc" | "desc" = "asc"): T[] {
 	return [...array].sort((a, b) => {
 		const aVal = a[key];
 		const bVal = b[key];
@@ -66,9 +62,7 @@ export function intersection<T>(...arrays: T[][]): T[] {
 	if (arrays.length === 0) return [];
 	if (arrays.length === 1) return arrays[0] ?? [];
 
-	return arrays.reduce((acc, array) =>
-		acc.filter((item) => array.includes(item)),
-	);
+	return arrays.reduce((acc, array) => acc.filter((item) => array.includes(item)));
 }
 
 export function difference<T>(array1: T[], array2: T[]): T[] {
@@ -101,10 +95,7 @@ export function isEmptyArray<T>(array: T[]): boolean {
 	return array.length === 0;
 }
 
-export function partition<T>(
-	array: T[],
-	predicate: (item: T) => boolean,
-): [T[], T[]] {
+export function partition<T>(array: T[], predicate: (item: T) => boolean): [T[], T[]] {
 	const pass: T[] = [];
 	const fail: T[] = [];
 	for (const item of array) {
