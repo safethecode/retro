@@ -1,11 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const isCI = Boolean(process.env.CI);
+const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+
 export default defineConfig({
 	testDir: "./e2e",
 	fullyParallel: true,
-	forbidOnly: !!process.env.CI,
-	retries: process.env.CI ? 2 : 0,
-	workers: process.env.CI ? 1 : undefined,
+	forbidOnly: isCI,
+	retries: isCI ? 2 : 0,
+	...(isCI ? { workers: 1 } : {}),
 	reporter: "html",
 	use: {
 		baseURL: "http://localhost:3000",
@@ -14,7 +17,12 @@ export default defineConfig({
 	projects: [
 		{
 			name: "chromium",
-			use: { ...devices["Desktop Chrome"] },
+			use: {
+				...devices["Desktop Chrome"],
+				...(chromiumExecutablePath
+					? { launchOptions: { executablePath: chromiumExecutablePath } }
+					: {}),
+			},
 		},
 		{
 			name: "firefox",
@@ -28,6 +36,9 @@ export default defineConfig({
 	webServer: {
 		command: "pnpm dev",
 		url: "http://localhost:3000",
-		reuseExistingServer: !process.env.CI,
+		reuseExistingServer: !isCI,
+		env: {
+			AUTH_SECRET: process.env.AUTH_SECRET ?? "playwright-only-secret-not-for-production",
+		},
 	},
 });

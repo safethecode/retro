@@ -22,9 +22,7 @@ type AllTheProvidersProps = {
 function AllTheProviders({ children }: AllTheProvidersProps) {
 	const queryClient = createTestQueryClient();
 
-	return (
-		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-	);
+	return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }
 
 function customRender(

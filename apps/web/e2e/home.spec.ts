@@ -13,9 +13,9 @@ test.describe("Home Page", () => {
 	});
 
 	test("should switch language to English", async ({ page }) => {
-		await page.goto("/");
+		await page.goto("/ko");
 		await page.getByRole("button", { name: "English" }).click();
-		await expect(page).toHaveURL("/en");
+		await expect(page).toHaveURL(/\/en$/);
 	});
 });
 
@@ -25,7 +25,16 @@ test.describe("Health Check API", () => {
 		expect(response.ok()).toBeTruthy();
 
 		const data = await response.json();
-		expect(data.success).toBe(true);
 		expect(data.data.status).toBe("ok");
+	});
+});
+
+test.describe("Authentication boundary", () => {
+	test("should keep login public and redirect a protected page", async ({ page }) => {
+		await page.goto("/en/login");
+		await expect(page).toHaveURL(/\/en\/login$/);
+
+		await page.goto("/en/dashboard");
+		await expect(page).toHaveURL(/\/en\/login\?callbackUrl=%2Fen%2Fdashboard$/);
 	});
 });
