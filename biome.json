@@ -1,131 +1,132 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
-	"vcs": {
-		"enabled": true,
-		"clientKind": "git",
-		"useIgnoreFile": true
-	},
-	"files": {
-		"includes": [
-			"**",
-			"!**/.next",
-			"!**/.turbo",
-			"!**/coverage",
-			"!**/dist",
-			"!**/node_modules",
-			"!**/public"
-		]
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
-		"lineWidth": 100
-	},
-	"assist": {
-		"enabled": true,
-		"actions": {
-			"source": {
-				"organizeImports": "on"
-			}
-		}
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"preset": "recommended",
-			"complexity": {
-				"noExcessiveCognitiveComplexity": {
-					"level": "error",
-					"options": { "maxAllowedComplexity": 20 }
-				}
-			},
-			"nursery": {
-				"noFloatingPromises": "error",
-				"noMisusedPromises": "error"
-			},
-			"style": {
-				"noNonNullAssertion": "error",
-				"useImportType": "error",
-				"useNodejsImportProtocol": "error"
-			},
-			"suspicious": {
-				"noConsole": "error",
-				"noExplicitAny": "error",
-				"noImportCycles": "error"
-			}
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double",
-			"semicolons": "always",
-			"trailingCommas": "all"
-		}
-	},
-	"css": {
-		"parser": {
-			"tailwindDirectives": true
-		}
-	},
-	"overrides": [
-		{
-			"includes": ["packages/ui/src/components/**"],
-			"linter": {
-				"rules": {
-					"a11y": {
-						"useAriaPropsForRole": "off",
-						"useFocusableInteractive": "off",
-						"useKeyWithClickEvents": "off",
-						"useSemanticElements": "off"
-					},
-					"suspicious": {
-						"noArrayIndexKey": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["packages/ui/src/components/chart.tsx"],
-			"linter": {
-				"rules": {
-					"complexity": {
-						"noExcessiveCognitiveComplexity": "off"
-					},
-					"security": {
-						"noDangerouslySetInnerHtml": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["packages/ui/src/components/sidebar.tsx"],
-			"linter": {
-				"rules": {
-					"suspicious": {
-						"noDocumentCookie": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
-			"linter": {
-				"rules": {
-					"suspicious": {
-						"noConsole": "off"
-					}
-				}
-			}
-		},
-		{
-			"includes": ["apps/web/src/lib/http/with-error-handler.ts"],
-			"linter": {
-				"rules": {
-					"suspicious": {
-						"noConsole": "off"
-					}
-				}
-			}
-		}
-	]
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/.next",
+      "!**/.turbo",
+      "!**/coverage",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/public"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": { "maxAllowedComplexity": 20 }
+        }
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "error",
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error"
+      },
+      "suspicious": {
+        "noConsole": "error",
+        "noExplicitAny": "error",
+        "noImportCycles": "error"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["packages/ui/src/components/**"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useAriaPropsForRole": "off",
+            "useFocusableInteractive": "off",
+            "useKeyWithClickEvents": "off",
+            "useSemanticElements": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/ui/src/components/chart.tsx"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "off"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/ui/src/components/sidebar.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDocumentCookie": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/lib/http/with-error-handler.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
 }
