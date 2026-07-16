@@ -8,10 +8,7 @@ type SignOutButtonProps = {
 	className?: string;
 };
 
-export function SignOutButton({
-	children = "로그아웃",
-	className,
-}: SignOutButtonProps) {
+export function SignOutButton({ children = "로그아웃", className }: SignOutButtonProps) {
 	async function handleSignOut() {
 		await signOut({ callbackUrl: "/" });
 	}

@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { z } from "zod";
+import { env } from "@/config/env";
 import { authConfig } from "./auth.config";
 
 const credentialsSchema = z.object({
@@ -9,13 +10,20 @@ const credentialsSchema = z.object({
 	password: z.string().min(1),
 });
 
+const googleProvider =
+	env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET
+		? [
+				Google({
+					clientId: env.AUTH_GOOGLE_ID,
+					clientSecret: env.AUTH_GOOGLE_SECRET,
+				}),
+			]
+		: [];
+
 const nextAuth = NextAuth({
 	...authConfig,
 	providers: [
-		Google({
-			clientId: process.env.AUTH_GOOGLE_ID,
-			clientSecret: process.env.AUTH_GOOGLE_SECRET,
-		}),
+		...googleProvider,
 		Credentials({
 			name: "credentials",
 			credentials: {

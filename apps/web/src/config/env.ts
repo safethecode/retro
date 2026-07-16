@@ -3,9 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
 	server: {
-		NODE_ENV: z
-			.enum(["development", "test", "production"])
-			.default("development"),
+		NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 		AUTH_SECRET: z.string().min(1).optional(),
 		AUTH_URL: z.string().url().optional(),
 		AUTH_GOOGLE_ID: z.string().optional(),
@@ -13,6 +11,7 @@ export const env = createEnv({
 	},
 	client: {
 		NEXT_PUBLIC_API_URL: z.string().url().optional(),
+		NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
 	},
 	runtimeEnv: {
 		NODE_ENV: process.env.NODE_ENV,
@@ -21,6 +20,7 @@ export const env = createEnv({
 		AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
 		AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
 		NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+		NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
 	},
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 	emptyStringAsUndefined: true,
