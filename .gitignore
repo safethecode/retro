@@ -9,6 +9,8 @@ node_modules
 .env.production.local
 
 coverage
+playwright-report
+test-results
 
 .turbo
 
