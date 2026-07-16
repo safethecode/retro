@@ -1,32 +1,32 @@
 {
-	"name": "retro-boilerplate",
-	"version": "0.3.0",
-	"private": true,
-	"engines": {
-		"node": ">=24 <25",
-		"pnpm": ">=11.13.0 <12"
-	},
-	"packageManager": "pnpm@11.13.0",
-	"scripts": {
-		"build": "turbo run build",
-		"dev": "turbo run dev",
-		"lint": "biome check .",
-		"lint:fix": "biome check --write .",
-		"format": "biome format --write .",
-		"boundaries": "turbo boundaries",
-		"ui:update": "pnpm dlx shadcn@latest add --all --overwrite -c packages/ui",
-		"check-types": "turbo run check-types",
-		"test": "turbo run test",
-		"test:coverage": "turbo run test:coverage",
-		"test:e2e": "turbo run test:e2e",
-		"verify": "pnpm lint && pnpm check-types && pnpm test && pnpm build"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.5.3",
-		"@types/node": "^24.13.3",
-		"@types/react": "^19.2.17",
-		"@types/react-dom": "^19.2.3",
-		"turbo": "^2.10.5",
-		"typescript": "6.0.3"
-	}
+  "name": "retro-boilerplate",
+  "version": "0.3.1",
+  "private": true,
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11.13.0 <12"
+  },
+  "packageManager": "pnpm@11.13.0",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "boundaries": "turbo boundaries",
+    "ui:update": "pnpm dlx shadcn@latest add --all --overwrite -c packages/ui",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:e2e": "turbo run test:e2e",
+    "verify": "pnpm lint && pnpm check-types && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "turbo": "^2.10.5",
+    "typescript": "6.0.3"
+  }
 }
