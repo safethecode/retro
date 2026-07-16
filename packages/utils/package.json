@@ -1,7 +1,8 @@
 {
-	"name": "@pkg/utils",
+	"name": "@repo/utils",
 	"version": "0.0.1",
 	"private": true,
+	"type": "module",
 	"exports": {
 		"./string": "./src/string.ts",
 		"./number": "./src/number.ts",
@@ -13,7 +14,7 @@
 		"check-types": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@pkg/typescript-config": "workspace:*",
-		"typescript": "5.9.3"
+		"@repo/typescript-config": "workspace:*",
+		"typescript": "6.0.3"
 	}
 }

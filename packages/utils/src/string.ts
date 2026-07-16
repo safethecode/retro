@@ -16,9 +16,7 @@ export function kebabCase(str: string): string {
 }
 
 export function camelCase(str: string): string {
-	return str
-		.toLowerCase()
-		.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+	return str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 }
 
 export function normalizeWhitespace(str: string): string {
@@ -30,8 +28,7 @@ export function isBlank(str: string | null | undefined): boolean {
 }
 
 export function randomString(length: number): string {
-	const chars =
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	let result = "";
 	for (let i = 0; i < length; i++) {
 		result += chars.charAt(Math.floor(Math.random() * chars.length));

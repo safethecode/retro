@@ -1,0 +1,17 @@
+{
+	"extends": "@repo/typescript-config/react-library.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"paths": {
+			"@repo/ui/components/*": ["./src/components/*"],
+			"@repo/ui/hooks/*": ["./src/hooks/*"],
+			"@repo/ui/lib": ["./src/lib"],
+			"@repo/ui/lib/*": ["./src/lib/*"],
+			"@repo/ui/utils": ["./src/lib/utils.ts"]
+		}
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "dist"]
+}

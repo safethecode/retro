@@ -41,10 +41,7 @@ export function deepMerge<T extends Record<string, unknown>>(
 		for (const key in source) {
 			if (isObject(source[key])) {
 				if (!target[key]) Object.assign(target, { [key]: {} });
-				deepMerge(
-					target[key] as Record<string, unknown>,
-					source[key] as Record<string, unknown>,
-				);
+				deepMerge(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>);
 			} else {
 				Object.assign(target, { [key]: source[key] });
 			}
@@ -77,11 +74,7 @@ export function getNestedValue<T>(
 	return result as T;
 }
 
-export function setNestedValue(
-	obj: Record<string, unknown>,
-	path: string,
-	value: unknown,
-): void {
+export function setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
 	const keys = path.split(".");
 	const lastKey = keys.pop();
 	if (!lastKey) return;

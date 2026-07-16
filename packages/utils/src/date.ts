@@ -7,18 +7,12 @@ export function formatDate(
 	return dateObj.toLocaleDateString(locale, options);
 }
 
-export function formatDateTime(
-	date: Date | string | number,
-	locale = "ko-KR",
-): string {
+export function formatDateTime(date: Date | string | number, locale = "ko-KR"): string {
 	const dateObj = new Date(date);
 	return dateObj.toLocaleString(locale);
 }
 
-export function getRelativeTime(
-	date: Date | string | number,
-	locale = "ko-KR",
-): string {
+export function getRelativeTime(date: Date | string | number, locale = "ko-KR"): string {
 	const dateObj = new Date(date);
 	const now = new Date();
 	const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);

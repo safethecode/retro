@@ -6,11 +6,7 @@ export function formatNumber(num: number, locale = "ko-KR"): string {
 	return new Intl.NumberFormat(locale).format(num);
 }
 
-export function formatCurrency(
-	amount: number,
-	currency = "KRW",
-	locale = "ko-KR",
-): string {
+export function formatCurrency(amount: number, currency = "KRW", locale = "ko-KR"): string {
 	return new Intl.NumberFormat(locale, {
 		style: "currency",
 		currency,
@@ -23,9 +19,7 @@ export function roundTo(num: number, decimals: number): number {
 }
 
 export function isValidNumber(value: unknown): value is number {
-	return (
-		typeof value === "number" && !Number.isNaN(value) && Number.isFinite(value)
-	);
+	return typeof value === "number" && !Number.isNaN(value) && Number.isFinite(value);
 }
 
 export function randomInt(min: number, max: number): number {
