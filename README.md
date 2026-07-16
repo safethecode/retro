@@ -1,84 +1,101 @@
-# Turborepo starter
+# Retro Web Starter
 
-This Turborepo starter is maintained by the Turborepo core team.
+A production-oriented Next.js monorepo starter with explicit application boundaries, shared UI,
+strict static analysis, and a small test pyramid.
 
-## Using this example
+## Stack
 
-Run the following command:
+- Node.js 24 LTS and pnpm 11
+- Next.js 16, React 19, TypeScript 6
+- Turborepo workspaces
+- Tailwind CSS 4 and shadcn/ui
+- Biome for formatting, linting, import organization, and architecture checks
+- Vitest and Playwright
+- Auth.js and next-intl
 
-```sh
-npx create-turbo@latest
-```
+## Getting started
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@pkg/design-system`: a stub React component library shared by both `web` and `docs` applications
-- `@pkg/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@pkg/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
+```bash
+cp .env.example apps/web/.env.local
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-### Remote Caching
+The web app is available at <http://localhost:3000>. The credentials provider includes the local
+demo account `test@example.com` / `password`. Configure the optional Google variables to enable the
+Google provider.
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## Repository layout
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
+```text
+apps/
+  web/
+    src/
+      app/          Next.js routes and route composition
+      components/   app-wide, domain-neutral components
+      config/       validated environment and runtime configuration
+      i18n/         locale routing and messages
+      lib/          domain-neutral infrastructure
+      modules/      business capabilities with public entry points
+      styles/       application styles and fonts
+      test/         shared test setup and architecture contracts
+packages/
+  ui/               reusable UI components, hooks, providers, and styles
+  utils/            framework-neutral utilities
+  typescript-config/ shared strict TypeScript configurations
 ```
-cd my-turborepo
-npx turbo login
+
+The intended dependency direction is:
+
+```text
+app -> modules -> lib/config
+app -> components -> lib/config
+app/modules/components -> @repo/ui, @repo/utils
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+Neutral layers (`components`, `config`, and `lib`) must not import application modules. Server-only
+module exports live below a `server` entry point and must import `server-only`. See `AGENTS.md` for
+the complete contribution contract.
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+## Commands
 
-```
-npx turbo link
-```
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev` | Start workspace development tasks |
+| `pnpm build` | Build all buildable workspaces |
+| `pnpm lint` | Run Biome checks without changing files |
+| `pnpm lint:fix` | Apply safe Biome fixes |
+| `pnpm format` | Format supported files |
+| `pnpm check-types` | Type-check every package |
+| `pnpm test` | Run unit and architecture tests |
+| `pnpm test:e2e` | Run Playwright browser tests |
+| `pnpm verify` | Run lint, types, unit tests, and production builds |
+| `pnpm ui:update` | Refresh shadcn/ui sources intentionally |
 
-## Useful Links
+Run `pnpm exec playwright install` once before the first local end-to-end test.
 
-Learn more about the power of Turborepo:
+## Environment
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+Environment variables are declared in `.env.example` and validated in
+`apps/web/src/config/env.ts`. Add a variable to both places in the same change. Never access a
+client variable without the `NEXT_PUBLIC_` prefix, and never expose a server secret from a Client
+Component.
+
+## Adding code
+
+- Add a business capability under `apps/web/src/modules/<name>` and expose its client-safe API from
+  the module root.
+- Put cross-feature visual primitives in `@repo/ui`; keep app-specific composition in
+  `apps/web/src/components`.
+- Promote a utility to `@repo/utils` only when it is framework-neutral and has more than one real
+  consumer.
+- Keep route handlers thin. Known failures use `AppError`; unexpected failures are hidden by the
+  shared HTTP error boundary.
+- Add tests with behavior. Architecture tests protect boundaries and should be extended when a new
+  invariant is introduced.
+
+## CI
+
+GitHub Actions installs with the frozen lockfile and runs static analysis, type checks, unit tests,
+the production build, and Playwright smoke coverage. Dependency updates are managed by the existing
+Dependabot configuration.
