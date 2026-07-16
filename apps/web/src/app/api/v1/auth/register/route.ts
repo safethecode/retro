@@ -1,11 +1,6 @@
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import {
-	errorResponse,
-	successResponse,
-	validateBody,
-	withErrorHandler,
-} from "@/lib/api";
+import { AppError, parseJson, withErrorHandler } from "@/lib/http";
 
 const registerBodySchema = z.object({
 	email: z.string().email(),
@@ -14,15 +9,10 @@ const registerBodySchema = z.object({
 });
 
 export const POST = withErrorHandler(async (request: NextRequest) => {
-	const validation = await validateBody(request, registerBodySchema);
-	if (!validation.success) {
-		return validation.response;
-	}
-
-	const { email, name } = validation.data;
+	const { email, name } = await parseJson(request, registerBodySchema);
 
 	if (email === "existing@example.com") {
-		return errorResponse("User already exists", 409);
+		throw new AppError("USER_EXISTS", 409, "User already exists");
 	}
 
 	const newUser = {
@@ -32,5 +22,5 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 		createdAt: new Date().toISOString(),
 	};
 
-	return successResponse(newUser, 201);
+	return Response.json({ data: newUser }, { status: 201 });
 });
