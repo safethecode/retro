@@ -5,13 +5,13 @@ import type { ReactNode } from "react";
 import { QueryProvider } from "@/lib/query";
 
 type ProvidersProps = {
-	children: ReactNode;
+  children: ReactNode;
 };
 
 export function Providers({ children }: ProvidersProps) {
-	return (
-		<SessionProvider>
-			<QueryProvider>{children}</QueryProvider>
-		</SessionProvider>
-	);
+  return (
+    <SessionProvider>
+      <QueryProvider>{children}</QueryProvider>
+    </SessionProvider>
+  );
 }

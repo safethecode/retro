@@ -9,16 +9,16 @@ import "@/styles/globals.css";
 export const metadata: Metadata = defaultMetadata;
 
 export default function RootLayout({
-	children,
+  children,
 }: Readonly<{
-	children: ReactNode;
+  children: ReactNode;
 }>) {
-	return (
-		<html lang="ko" suppressHydrationWarning>
-			<body className={`${pretendard.variable} antialiased`}>
-				<Providers>{children}</Providers>
-				<Analytics />
-			</body>
-		</html>
-	);
+  return (
+    <html lang="ko" suppressHydrationWarning>
+      <body className={`${pretendard.variable} antialiased`}>
+        <Providers>{children}</Providers>
+        <Analytics />
+      </body>
+    </html>
+  );
 }

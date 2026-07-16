@@ -1,27 +1,27 @@
 @import "@repo/ui/styles.css";
 
 :root {
-	--background: #ffffff;
-	--foreground: #171717;
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 html,
 body {
-	max-width: 100vw;
-	overflow-x: hidden;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
-	color: var(--foreground);
-	background: var(--background);
+  color: var(--foreground);
+  background: var(--background);
 }
 
 * {
-	box-sizing: border-box;
-	font-family: "Pretendard", sans-serif;
+  box-sizing: border-box;
+  font-family: "Pretendard", sans-serif;
 }
 
 a {
-	color: inherit;
-	text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }

@@ -1,20 +1,20 @@
 {
-	"name": "@repo/utils",
-	"version": "0.0.1",
-	"private": true,
-	"type": "module",
-	"exports": {
-		"./string": "./src/string.ts",
-		"./number": "./src/number.ts",
-		"./date": "./src/date.ts",
-		"./object": "./src/object.ts",
-		"./array": "./src/array.ts"
-	},
-	"scripts": {
-		"check-types": "tsc --noEmit"
-	},
-	"devDependencies": {
-		"@repo/typescript-config": "workspace:*",
-		"typescript": "6.0.3"
-	}
+  "name": "@repo/utils",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./string": "./src/string.ts",
+    "./number": "./src/number.ts",
+    "./date": "./src/date.ts",
+    "./object": "./src/object.ts",
+    "./array": "./src/array.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "6.0.3"
+  }
 }

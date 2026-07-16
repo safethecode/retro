@@ -6,53 +6,53 @@ import { env } from "@/config/env";
 import { authConfig } from "./auth.config";
 
 const credentialsSchema = z.object({
-	email: z.string().email(),
-	password: z.string().min(1),
+  email: z.string().email(),
+  password: z.string().min(1),
 });
 
 const googleProvider =
-	env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET
-		? [
-				Google({
-					clientId: env.AUTH_GOOGLE_ID,
-					clientSecret: env.AUTH_GOOGLE_SECRET,
-				}),
-			]
-		: [];
+  env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET
+    ? [
+        Google({
+          clientId: env.AUTH_GOOGLE_ID,
+          clientSecret: env.AUTH_GOOGLE_SECRET,
+        }),
+      ]
+    : [];
 
 const nextAuth = NextAuth({
-	...authConfig,
-	providers: [
-		...googleProvider,
-		Credentials({
-			name: "credentials",
-			credentials: {
-				email: { label: "Email", type: "email" },
-				password: { label: "Password", type: "password" },
-			},
-			async authorize(credentials) {
-				const parsed = credentialsSchema.safeParse(credentials);
-				if (!parsed.success) {
-					return null;
-				}
+  ...authConfig,
+  providers: [
+    ...googleProvider,
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const parsed = credentialsSchema.safeParse(credentials);
+        if (!parsed.success) {
+          return null;
+        }
 
-				const { email, password } = parsed.data;
+        const { email, password } = parsed.data;
 
-				if (email === "test@example.com" && password === "password") {
-					return {
-						id: "1",
-						email: "test@example.com",
-						name: "Test User",
-					};
-				}
+        if (email === "test@example.com" && password === "password") {
+          return {
+            id: "1",
+            email: "test@example.com",
+            name: "Test User",
+          };
+        }
 
-				return null;
-			},
-		}),
-	],
-	session: {
-		strategy: "jwt",
-	},
+        return null;
+      },
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
 });
 
 export const handlers = nextAuth.handlers;
