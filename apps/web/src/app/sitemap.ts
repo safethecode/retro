@@ -1,13 +1,12 @@
 import type { MetadataRoute } from "next";
+import { env } from "@/config/env";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	const baseUrl = process.env.NEXT_PUBLIC_URL as string;
-
 	const currentDate = new Date();
 
 	const staticRoutes: MetadataRoute.Sitemap = [
 		{
-			url: baseUrl,
+			url: env.NEXT_PUBLIC_SITE_URL,
 			lastModified: currentDate,
 			changeFrequency: "daily",
 			priority: 1.0,

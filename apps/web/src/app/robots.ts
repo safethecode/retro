@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { env } from "@/config/env";
 
 export default function robots(): MetadataRoute.Robots {
 	return {
@@ -8,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
 				allow: "/",
 			},
 		],
-		sitemap: `${process.env.NEXT_PUBLIC_URL}/sitemap.xml`,
-		host: process.env.NEXT_PUBLIC_URL,
+		sitemap: `${env.NEXT_PUBLIC_SITE_URL}/sitemap.xml`,
+		host: env.NEXT_PUBLIC_SITE_URL,
 	};
 }
