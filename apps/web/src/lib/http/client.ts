@@ -1,12 +1,14 @@
-import { env } from "@/src/env";
+import { env } from "@/config/env";
 
 type RequestConfig = RequestInit & {
 	params?: Record<string, string>;
 };
 
-type ApiResponse<T> =
+export type ApiError = { code: string; message: string; details?: unknown };
+
+export type ApiResult<T> =
 	| { success: true; data: T }
-	| { success: false; error: string; status: number };
+	| { success: false; error: ApiError; status: number };
 
 const BASE_URL = env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -20,10 +22,7 @@ function buildUrl(endpoint: string, params?: Record<string, string>): string {
 	return url.toString();
 }
 
-async function request<T>(
-	endpoint: string,
-	config: RequestConfig = {},
-): Promise<ApiResponse<T>> {
+async function request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResult<T>> {
 	const { params, ...init } = config;
 	const url = buildUrl(endpoint, params);
 
@@ -39,23 +38,49 @@ async function request<T>(
 		});
 
 		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
+			const payload: unknown = await response.json().catch(() => undefined);
 			return {
 				success: false,
-				error: errorData.error ?? response.statusText,
+				error: readApiError(payload, response.statusText),
 				status: response.status,
 			};
 		}
 
-		const data = await response.json();
-		return { success: true, data };
-	} catch (error) {
+		const payload = (await response.json()) as { data: T };
+		return { success: true, data: payload.data };
+	} catch {
 		return {
 			success: false,
-			error: error instanceof Error ? error.message : "Unknown error",
+			error: { code: "NETWORK_ERROR", message: "Unable to reach the server" },
 			status: 0,
 		};
 	}
+}
+
+function readApiError(payload: unknown, fallbackMessage: string): ApiError {
+	if (
+		typeof payload === "object" &&
+		payload !== null &&
+		"error" in payload &&
+		typeof payload.error === "object" &&
+		payload.error !== null &&
+		"code" in payload.error &&
+		typeof payload.error.code === "string" &&
+		"message" in payload.error &&
+		typeof payload.error.message === "string"
+	) {
+		return {
+			code: payload.error.code,
+			message: payload.error.message,
+			...("details" in payload.error ? { details: payload.error.details } : {}),
+		};
+	}
+
+	return { code: "HTTP_ERROR", message: fallbackMessage || "Request failed" };
+}
+
+function jsonBody(body: unknown): { body?: BodyInit } {
+	return body === undefined ? {} : { body: JSON.stringify(body) };
 }
 
 export const api = {
@@ -67,7 +92,7 @@ export const api = {
 		return request<T>(endpoint, {
 			...config,
 			method: "POST",
-			body: body ? JSON.stringify(body) : undefined,
+			...jsonBody(body),
 		});
 	},
 
@@ -75,7 +100,7 @@ export const api = {
 		return request<T>(endpoint, {
 			...config,
 			method: "PUT",
-			body: body ? JSON.stringify(body) : undefined,
+			...jsonBody(body),
 		});
 	},
 
@@ -83,7 +108,7 @@ export const api = {
 		return request<T>(endpoint, {
 			...config,
 			method: "PATCH",
-			body: body ? JSON.stringify(body) : undefined,
+			...jsonBody(body),
 		});
 	},
 

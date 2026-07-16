@@ -1,11 +1,6 @@
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import {
-	successResponse,
-	validateBody,
-	validateQuery,
-	withErrorHandler,
-} from "@/lib/api";
+import { parseJson, withErrorHandler } from "@/lib/http";
 
 const getUsersQuerySchema = z.object({
 	page: z.coerce.number().min(1).default(1),
@@ -18,32 +13,26 @@ const createUserBodySchema = z.object({
 });
 
 export const GET = withErrorHandler(async (request: NextRequest) => {
-	const validation = validateQuery(request, getUsersQuerySchema);
-	if (!validation.success) {
-		return validation.response;
-	}
-
-	const { page, limit } = validation.data;
+	const { page, limit } = getUsersQuerySchema.parse(
+		Object.fromEntries(request.nextUrl.searchParams),
+	);
 
 	const users = [{ id: "1", email: "user@example.com", name: "Example User" }];
 
-	return successResponse({
-		users,
-		pagination: {
-			page,
-			limit,
-			total: users.length,
+	return Response.json({
+		data: {
+			users,
+			pagination: {
+				page,
+				limit,
+				total: users.length,
+			},
 		},
 	});
 });
 
 export const POST = withErrorHandler(async (request: NextRequest) => {
-	const validation = await validateBody(request, createUserBodySchema);
-	if (!validation.success) {
-		return validation.response;
-	}
-
-	const { email, name } = validation.data;
+	const { email, name } = await parseJson(request, createUserBodySchema);
 
 	const newUser = {
 		id: crypto.randomUUID(),
@@ -52,5 +41,5 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 		createdAt: new Date().toISOString(),
 	};
 
-	return successResponse(newUser, 201);
+	return Response.json({ data: newUser }, { status: 201 });
 });
