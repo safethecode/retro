@@ -1,6 +1,4 @@
-@import "tailwindcss";
-@import "tailwindcss/utilities";
-@import "@pkg/design-system/styles";
+@import "@repo/ui/styles.css";
 
 :root {
 	--background: #ffffff;

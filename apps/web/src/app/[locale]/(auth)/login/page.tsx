@@ -1,7 +1,7 @@
-import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { LoginForm } from "@/features/auth";
+import { Suspense } from "react";
 import { Link } from "@/i18n";
+import { LoginForm } from "@/modules/auth";
 
 type LoginPageProps = {
 	params: Promise<{ locale: string }>;

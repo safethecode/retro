@@ -1,8 +1,8 @@
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Providers } from "@/components/providers";
 import { defaultMetadata } from "@/lib/metadata/default-metadata";
-import { Providers } from "@/shared/components/providers";
 import { pretendard } from "@/styles/fonts";
 import "@/styles/globals.css";
 

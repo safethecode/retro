@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { SignOutButton } from "@/features/auth";
-import { auth } from "@/lib/auth";
+import { SignOutButton } from "@/modules/auth";
+import { auth } from "@/modules/auth/server";
 
 type DashboardPageProps = {
 	params: Promise<{ locale: string }>;
