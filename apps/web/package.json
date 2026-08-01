@@ -38,7 +38,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "4.1.10",
-    "autoprefixer": "^10.5.2",
+    "autoprefixer": "^10.5.4",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.19",
     "tailwindcss": "^4.3.2",
