@@ -7,6 +7,14 @@ updates:
     open-pull-requests-limit: 10
     schedule:
       interval: "monthly"
+    groups:
+      minor-and-patch:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
@@ -14,3 +22,11 @@ updates:
     open-pull-requests-limit: 10
     schedule:
       interval: "monthly"
+    groups:
+      minor-and-patch:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

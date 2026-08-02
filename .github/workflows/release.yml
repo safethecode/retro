@@ -1,0 +1,130 @@
+name: Weekly release
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out main and tags
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          run_install: false
+          version: 11.13.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          cache: pnpm
+          node-version-file: .node-version
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify the trusted main branch
+        run: pnpm verify
+
+      - name: Prepare and publish the release
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin main --tags
+          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]]; then
+            echo "main advanced while the release job was starting."
+            exit 1
+          fi
+
+          current_version=$(node -p "require('./package.json').version")
+          current_tag="v$current_version"
+          latest_tag=$(git tag --list 'v[0-9]*' --sort=-version:refname | head -n 1)
+
+          if [[ -z "$latest_tag" || "$current_tag" != "$latest_tag" ]]; then
+            echo "package.json version $current_version does not match latest tag $latest_tag."
+            exit 1
+          fi
+
+          head_sha=$(git rev-parse HEAD)
+          tag_sha=$(git rev-list -n 1 "$current_tag")
+          if [[ "$head_sha" == "$tag_sha" ]]; then
+            if gh release view "$current_tag" >/dev/null 2>&1; then
+              echo "No commits exist after $current_tag."
+              exit 0
+            fi
+
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "GitHub Release for $current_tag needs recovery."
+              exit 0
+            fi
+
+            previous_tag=$(git tag --list 'v[0-9]*' --sort=-version:refname | sed -n '2p')
+            release_arguments=(--verify-tag --title "$current_tag" --generate-notes)
+            if [[ -n "$previous_tag" ]]; then
+              release_arguments+=(--notes-start-tag "$previous_tag")
+            fi
+            gh release create "$current_tag" "${release_arguments[@]}"
+            exit 0
+          fi
+
+          if ! gh release view "$current_tag" >/dev/null 2>&1; then
+            echo "GitHub Release for $current_tag is missing while newer commits exist."
+            exit 1
+          fi
+
+          next_version=$(node .github/scripts/dependabot-policy.mjs next-patch "$current_version")
+          next_tag="v$next_version"
+          echo "Next release: $next_tag"
+          git log --oneline "$current_tag"..HEAD
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            exit 0
+          fi
+
+          pnpm version patch --no-git-tag-version
+          actual_version=$(node -p "require('./package.json').version")
+          if [[ "$actual_version" != "$next_version" ]]; then
+            echo "pnpm produced $actual_version instead of $next_version."
+            exit 1
+          fi
+
+          git diff --name-only | while IFS= read -r changed_file; do
+            case "$changed_file" in
+              package.json|pnpm-lock.yaml) ;;
+              *)
+                echo "Unexpected release change: $changed_file"
+                exit 1
+                ;;
+            esac
+          done
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml
+          git commit -m "chore(bump): $next_tag"
+          git tag -a "$next_tag" -m "$next_tag"
+          git push --atomic origin "HEAD:refs/heads/main" "refs/tags/$next_tag"
+
+          gh release create "$next_tag" --verify-tag --title "$next_tag" --generate-notes --notes-start-tag "$current_tag"

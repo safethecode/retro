@@ -1,0 +1,67 @@
+name: Dependabot merge
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: dependabot-merge
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Merge the verified Dependabot pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKFLOW_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          pr_number=$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/pull_requests" --jq '.[0].number // empty')
+
+          if [[ -z "$pr_number" ]]; then
+            echo "No pull request is associated with this CI run."
+            exit 0
+          fi
+
+          pull_request=$(gh api "repos/$REPOSITORY/pulls/$pr_number")
+          author=$(jq -r '.user.login' <<< "$pull_request")
+          base_ref=$(jq -r '.base.ref' <<< "$pull_request")
+          draft=$(jq -r '.draft' <<< "$pull_request")
+          head_sha=$(jq -r '.head.sha' <<< "$pull_request")
+          eligible=$(jq -r 'any(.labels[]?; .name == "dependencies:automerge")' <<< "$pull_request")
+
+          if [[ "$author" != "dependabot[bot]" ||
+                "$base_ref" != "main" ||
+                "$draft" != "false" ||
+                "$head_sha" != "$WORKFLOW_HEAD_SHA" ||
+                "$eligible" != "true" ]]; then
+            echo "Pull request #$pr_number is not eligible for automatic merge."
+            exit 0
+          fi
+
+          merge_state=$(jq -r '.mergeable_state // "unknown"' <<< "$pull_request")
+          if [[ "$merge_state" == "behind" ]]; then
+            gh pr comment "$pr_number" --repo "$REPOSITORY" --body "@dependabot rebase"
+            exit 0
+          fi
+
+          if [[ "$merge_state" != "clean" ]]; then
+            echo "Pull request #$pr_number has merge state: $merge_state"
+            exit 0
+          fi
+
+          gh pr merge "$pr_number" --repo "$REPOSITORY" --squash --delete-branch --match-head-commit "$WORKFLOW_HEAD_SHA"
