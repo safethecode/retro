@@ -14,6 +14,7 @@ type DependencyGroup = {
 type DependabotUpdate = {
   directory?: string;
   "multi-ecosystem-group"?: string;
+  "open-pull-requests-limit"?: number;
   "package-ecosystem"?: string;
   patterns?: string[];
   groups?: Record<string, DependencyGroup>;
@@ -29,6 +30,7 @@ type DependabotConfig = {
   "multi-ecosystem-groups"?: Record<
     string,
     {
+      "open-pull-requests-limit"?: number;
       schedule?: {
         day?: string;
         interval?: string;
@@ -100,11 +102,14 @@ describe("dependency automation", () => {
     const config = readYaml<DependabotConfig>(".github/dependabot.yml");
     const groupName = "weekly-dependencies";
 
-    expect(config["multi-ecosystem-groups"]?.[groupName]?.schedule).toEqual({
-      day: "sunday",
-      interval: "weekly",
-      time: "00:00",
-      timezone: "UTC",
+    expect(config["multi-ecosystem-groups"]?.[groupName]).toEqual({
+      "open-pull-requests-limit": 10,
+      schedule: {
+        day: "sunday",
+        interval: "weekly",
+        time: "00:00",
+        timezone: "UTC",
+      },
     });
 
     for (const ecosystem of ["npm", "github-actions"]) {
@@ -118,6 +123,7 @@ describe("dependency automation", () => {
         patterns: ["*"],
       });
       expect(update?.groups).toBeUndefined();
+      expect(update?.["open-pull-requests-limit"]).toBeUndefined();
       expect(update?.schedule).toBeUndefined();
     }
   });

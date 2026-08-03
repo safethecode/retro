@@ -2,6 +2,7 @@ version: 2
 
 multi-ecosystem-groups:
   weekly-dependencies:
+    open-pull-requests-limit: 10
     schedule:
       interval: "weekly"
       day: "sunday"
@@ -11,14 +12,12 @@ multi-ecosystem-groups:
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
-    open-pull-requests-limit: 10
     patterns:
       - "*"
     multi-ecosystem-group: "weekly-dependencies"
 
   - package-ecosystem: "npm"
     directory: "/"
-    open-pull-requests-limit: 10
     patterns:
       - "*"
     multi-ecosystem-group: "weekly-dependencies"
