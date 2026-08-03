@@ -20,6 +20,7 @@ type DependabotConfig = {
 };
 
 type WorkflowStep = {
+  env?: Record<string, string>;
   run?: string;
   uses?: string;
   with?: Record<string, unknown>;
@@ -174,7 +175,6 @@ describe("dependency automation", () => {
       workflows: ["CI"],
     });
     expect(workflow.permissions).toEqual({
-      actions: "read",
       contents: "write",
       issues: "write",
       "pull-requests": "write",
@@ -186,7 +186,10 @@ describe("dependency automation", () => {
     expect(job?.if).toContain("conclusion == 'success'");
     expect(job?.if).toContain("event == 'pull_request'");
     expect(steps.some((step) => step.uses?.startsWith("actions/checkout@"))).toBe(false);
-    expect(commands).toContain("actions/runs/$RUN_ID/pull_requests");
+    expect(steps[0]?.env?.PR_NUMBER).toBe(
+      `\${{ github.event.workflow_run.pull_requests[0].number }}`,
+    );
+    expect(commands).not.toContain("actions/runs/$RUN_ID/pull_requests");
     expect(commands).toContain("dependabot[bot]");
     expect(commands).toContain("dependencies:automerge");
     expect(commands).toContain("@dependabot rebase");
