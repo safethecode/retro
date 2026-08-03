@@ -1,8 +1,11 @@
 name: Weekly release
 
 on:
-  schedule:
-    - cron: "0 0 * * 1"
+  workflow_call:
+    inputs:
+      dry_run:
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
       dry_run:
@@ -47,7 +50,7 @@ jobs:
 
       - name: Prepare and publish the release
         env:
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+          DRY_RUN: ${{ inputs.dry_run }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail

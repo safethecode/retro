@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
@@ -11,11 +12,31 @@ type DependencyGroup = {
 };
 
 type DependabotUpdate = {
+  directory?: string;
+  "multi-ecosystem-group"?: string;
   "package-ecosystem"?: string;
+  patterns?: string[];
   groups?: Record<string, DependencyGroup>;
+  schedule?: {
+    day?: string;
+    interval?: string;
+    time?: string;
+    timezone?: string;
+  };
 };
 
 type DependabotConfig = {
+  "multi-ecosystem-groups"?: Record<
+    string,
+    {
+      schedule?: {
+        day?: string;
+        interval?: string;
+        time?: string;
+        timezone?: string;
+      };
+    }
+  >;
   updates?: DependabotUpdate[];
 };
 
@@ -31,11 +52,24 @@ type WorkflowConfig = {
     "cancel-in-progress"?: boolean;
     group?: string;
   };
-  jobs?: Record<string, { if?: string; steps?: WorkflowStep[] }>;
+  jobs?: Record<
+    string,
+    {
+      if?: string;
+      needs?: string;
+      outputs?: Record<string, string>;
+      permissions?: Record<string, string>;
+      steps?: WorkflowStep[];
+      uses?: string;
+      with?: Record<string, unknown>;
+    }
+  >;
   on?: {
-    pull_request_target?: { types?: string[] };
     schedule?: Array<{ cron?: string }>;
     workflow_dispatch?: {
+      inputs?: Record<string, { default?: boolean; type?: string }>;
+    };
+    workflow_call?: {
       inputs?: Record<string, { default?: boolean; type?: string }>;
     };
     workflow_run?: { types?: string[]; workflows?: string[] };
@@ -62,45 +96,29 @@ function runPolicy(...arguments_: string[]) {
 }
 
 describe("dependency automation", () => {
-  it("groups patch and minor updates within each ecosystem", () => {
+  it("combines all npm and GitHub Actions updates into one Sunday pull request", () => {
     const config = readYaml<DependabotConfig>(".github/dependabot.yml");
-    const expectedGroup = {
-      "applies-to": "version-updates",
-      patterns: ["*"],
-      "update-types": ["minor", "patch"],
-    };
+    const groupName = "weekly-dependencies";
+
+    expect(config["multi-ecosystem-groups"]?.[groupName]?.schedule).toEqual({
+      day: "sunday",
+      interval: "weekly",
+      time: "00:00",
+      timezone: "UTC",
+    });
 
     for (const ecosystem of ["npm", "github-actions"]) {
       const update = config.updates?.find(
         (candidate) => candidate["package-ecosystem"] === ecosystem,
       );
 
-      expect(update?.groups?.["minor-and-patch"]).toEqual(expectedGroup);
-    }
-  });
-
-  it("accepts Dependabot patch and minor updates for main", () => {
-    for (const updateType of ["version-update:semver-patch", "version-update:semver-minor"]) {
-      const result = runPolicy("classify", "dependabot[bot]", "main", updateType, "false");
-
-      expect(result.status).toBe(0);
-      expect(result.stdout.trim()).toBe("true");
-    }
-  });
-
-  it("rejects updates outside the automatic merge boundary", () => {
-    const rejectedInputs = [
-      ["renovate[bot]", "main", "version-update:semver-patch", "false"],
-      ["dependabot[bot]", "develop", "version-update:semver-patch", "false"],
-      ["dependabot[bot]", "main", "version-update:semver-major", "false"],
-      ["dependabot[bot]", "main", "version-update:semver-patch", "true"],
-    ];
-
-    for (const input of rejectedInputs) {
-      const result = runPolicy("classify", ...input);
-
-      expect(result.status).toBe(0);
-      expect(result.stdout.trim()).toBe("false");
+      expect(update).toMatchObject({
+        directory: "/",
+        "multi-ecosystem-group": groupName,
+        patterns: ["*"],
+      });
+      expect(update?.groups).toBeUndefined();
+      expect(update?.schedule).toBeUndefined();
     }
   });
 
@@ -127,37 +145,7 @@ describe("dependency automation", () => {
     }
   });
 
-  it("classifies candidates without checking out untrusted pull request code", () => {
-    const workflowPath = ".github/workflows/dependabot-candidate.yml";
-
-    expect(existsSync(repositoryPath(workflowPath))).toBe(true);
-    if (!existsSync(repositoryPath(workflowPath))) {
-      return;
-    }
-
-    const workflow = readYaml<WorkflowConfig>(workflowPath);
-    const steps = workflow.jobs?.classify?.steps ?? [];
-    const checkout = steps.find((step) => step.uses?.startsWith("actions/checkout@"));
-    const externalActions = steps.flatMap((step) => (step.uses ? [step.uses] : []));
-    const commands = steps.flatMap((step) => (step.run ? [step.run] : [])).join("\n");
-
-    expect(workflow.on?.pull_request_target?.types).toEqual(["opened", "reopened", "synchronize"]);
-    expect(workflow.permissions).toEqual({
-      contents: "read",
-      issues: "write",
-      "pull-requests": "write",
-    });
-    expect(externalActions).not.toEqual([]);
-    for (const action of externalActions) {
-      expect(action).toMatch(/@[a-f0-9]{40}$/);
-    }
-    expect(checkout?.with?.ref).toBe(`\${{ github.event.pull_request.base.sha }}`);
-    expect(commands).toContain("dependabot-policy.mjs classify");
-    expect(commands).toContain("dependencies:automerge");
-    expect(JSON.stringify(workflow)).not.toContain("pull_request.head");
-  });
-
-  it("merges only eligible Dependabot pull requests after CI succeeds", () => {
+  it("sequentially merges verified Dependabot pull requests on Monday", () => {
     const workflowPath = ".github/workflows/dependabot-merge.yml";
 
     expect(existsSync(repositoryPath(workflowPath))).toBe(true);
@@ -170,11 +158,15 @@ describe("dependency automation", () => {
     const steps = job?.steps ?? [];
     const commands = steps.flatMap((step) => (step.run ? [step.run] : [])).join("\n");
 
-    expect(workflow.on?.workflow_run).toEqual({
-      types: ["completed"],
-      workflows: ["CI"],
+    expect(workflow.on?.schedule).toEqual([{ cron: "0 0 * * 1" }]);
+    expect(workflow.on?.workflow_dispatch?.inputs?.dry_run).toEqual({
+      default: true,
+      type: "boolean",
     });
-    expect(workflow.permissions).toEqual({
+    expect(workflow.on?.workflow_run).toBeUndefined();
+    expect(workflow.permissions).toEqual({});
+    expect(job?.permissions).toEqual({
+      checks: "read",
       contents: "write",
       issues: "write",
       "pull-requests": "write",
@@ -183,22 +175,142 @@ describe("dependency automation", () => {
       "cancel-in-progress": false,
       group: "dependabot-merge",
     });
-    expect(job?.if).toContain("conclusion == 'success'");
-    expect(job?.if).toContain("event == 'pull_request'");
+    expect(job?.outputs?.merged_count).toContain("steps.merge.outputs.merged_count");
     expect(steps.some((step) => step.uses?.startsWith("actions/checkout@"))).toBe(false);
-    expect(steps[0]?.env?.PR_NUMBER).toBe(
-      `\${{ github.event.workflow_run.pull_requests[0].number }}`,
-    );
-    expect(commands).not.toContain("actions/runs/$RUN_ID/pull_requests");
+    expect(commands).toContain("pulls?state=open&base=main");
     expect(commands).toContain("dependabot[bot]");
-    expect(commands).toContain("dependencies:automerge");
+    expect(commands).toContain('base_ref" != "main');
+    expect(commands).toContain('draft" != "false');
     expect(commands).toContain("@dependabot rebase");
+    expect(commands).toContain('name == "verify"');
+    expect(commands).toContain('name == "e2e"');
+    expect(commands).toContain("gh pr checks");
+    expect(commands).toContain("--json name,bucket,workflow");
+    expect(commands).toContain("workflow_deadline");
+    expect(commands).toContain(".base.sha");
+    expect(commands).toContain(".merged");
     expect(commands).toContain("--match-head-commit");
     expect(commands).toContain("--delete-branch");
+    expect(commands).toContain("DRY_RUN");
+    expect(commands).toContain("merged_count=$merged_count");
+
+    const syntax = spawnSync("bash", ["-n"], {
+      encoding: "utf8",
+      input: commands,
+    });
+    expect(syntax.status).toBe(0);
+    expect(syntax.stderr).toBe("");
   });
 
-  it("publishes a verified weekly patch release with a safe dry run", () => {
+  it("rebases a stale clean pull request and counts only its confirmed merge", () => {
+    const workflow = readYaml<WorkflowConfig>(".github/workflows/dependabot-merge.yml");
+    const commands = (workflow.jobs?.merge?.steps ?? [])
+      .flatMap((step) => (step.run ? [step.run] : []))
+      .join("\n");
+    const temporaryDirectory = mkdtempSync(join(tmpdir(), "dependabot-merge-"));
+    const fakeGh = join(temporaryDirectory, "gh");
+    const fakeState = join(temporaryDirectory, "state");
+    const fakeLog = join(temporaryDirectory, "gh.log");
+    const githubOutput = join(temporaryDirectory, "github-output");
+
+    writeFileSync(
+      fakeGh,
+      `#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\\n' "$*" >> "$FAKE_GH_LOG"
+state="initial"
+if [[ -f "$FAKE_GH_STATE" ]]; then
+  state=$(<"$FAKE_GH_STATE")
+fi
+
+if [[ "$1 $2" == "api --paginate" ]]; then
+  printf '1\\n2\\n'
+  exit 0
+fi
+
+if [[ "$1 $2" == "api repos/example/retro/git/ref/heads/main" ]]; then
+  printf 'main-sha\\n'
+  exit 0
+fi
+
+if [[ "$1 $2" == "api repos/example/retro/pulls/1" ]]; then
+  if [[ "$*" == *"--jq .head.sha"* ]]; then
+    if [[ "$state" == "initial" ]]; then
+      printf 'head-1\\n'
+    else
+      printf 'head-2\\n'
+    fi
+    exit 0
+  fi
+
+  if [[ "$state" == "initial" ]]; then
+    printf '%s\\n' '{"user":{"login":"dependabot[bot]"},"base":{"ref":"main","sha":"old-main"},"draft":false,"head":{"sha":"head-1"},"mergeable_state":"clean","merged":false}'
+  elif [[ "$state" == "rebased" ]]; then
+    printf '%s\\n' '{"user":{"login":"dependabot[bot]"},"base":{"ref":"main","sha":"main-sha"},"draft":false,"head":{"sha":"head-2"},"mergeable_state":"clean","merged":false}'
+  else
+    printf '%s\\n' '{"user":{"login":"dependabot[bot]"},"base":{"ref":"main","sha":"main-sha"},"draft":false,"head":{"sha":"head-2"},"mergeable_state":"clean","merged":true,"merged_at":"2026-08-03T01:00:00Z"}'
+  fi
+  exit 0
+fi
+
+if [[ "$1 $2" == "api repos/example/retro/pulls/2" ]]; then
+  exit 1
+fi
+
+if [[ "$1 $2" == "pr comment" ]]; then
+  printf 'rebased\\n' > "$FAKE_GH_STATE"
+  exit 0
+fi
+
+if [[ "$1 $2" == "pr checks" ]]; then
+  printf '%s\\n' '[{"name":"verify","workflow":"CI","bucket":"pass"},{"name":"e2e","workflow":"CI","bucket":"pass"}]'
+  exit 0
+fi
+
+if [[ "$1 $2" == "pr merge" ]]; then
+  if [[ "$*" == *"--match-head-commit head-2"* ]]; then
+    printf 'merged\\n' > "$FAKE_GH_STATE"
+  fi
+  exit 1
+fi
+
+exit 1
+`,
+    );
+    chmodSync(fakeGh, 0o755);
+
+    try {
+      const result = spawnSync("bash", {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          DRY_RUN: "false",
+          FAKE_GH_LOG: fakeLog,
+          FAKE_GH_STATE: fakeState,
+          GITHUB_OUTPUT: githubOutput,
+          PATH: `${temporaryDirectory}:${process.env.PATH ?? ""}`,
+          REPOSITORY: "example/retro",
+        },
+        input: commands,
+      });
+
+      expect(result.status, result.stderr).toBe(0);
+      expect(result.stderr).toBe("");
+      const ghLog = readFileSync(fakeLog, "utf8");
+      expect(ghLog.indexOf("pr comment")).toBeLessThan(ghLog.indexOf("pr merge"));
+      expect(ghLog).toContain("--match-head-commit head-2");
+      expect(ghLog.lastIndexOf("api repos/example/retro/pulls/1")).toBeGreaterThan(
+        ghLog.indexOf("pr merge"),
+      );
+      expect(readFileSync(githubOutput, "utf8").trim()).toBe("merged_count=1");
+    } finally {
+      rmSync(temporaryDirectory, { force: true, recursive: true });
+    }
+  });
+
+  it("publishes a verified patch release only after a Dependabot merge", () => {
     const workflowPath = ".github/workflows/release.yml";
+    const mergeWorkflow = readYaml<WorkflowConfig>(".github/workflows/dependabot-merge.yml");
 
     expect(existsSync(repositoryPath(workflowPath))).toBe(true);
     if (!existsSync(repositoryPath(workflowPath))) {
@@ -210,7 +322,11 @@ describe("dependency automation", () => {
     const commands = steps.flatMap((step) => (step.run ? [step.run] : [])).join("\n");
     const externalActions = steps.flatMap((step) => (step.uses ? [step.uses] : []));
 
-    expect(workflow.on?.schedule).toEqual([{ cron: "0 0 * * 1" }]);
+    expect(workflow.on?.schedule).toBeUndefined();
+    expect(workflow.on?.workflow_call?.inputs?.dry_run).toEqual({
+      default: false,
+      type: "boolean",
+    });
     expect(workflow.on?.workflow_dispatch?.inputs?.dry_run).toEqual({
       default: true,
       type: "boolean",
@@ -232,5 +348,14 @@ describe("dependency automation", () => {
     expect(commands.indexOf("pnpm verify")).toBeLessThan(
       commands.indexOf("pnpm version patch --no-git-tag-version"),
     );
+
+    const releaseCall = mergeWorkflow.jobs?.release;
+    expect(releaseCall).toMatchObject({
+      needs: "merge",
+      permissions: { contents: "write" },
+      uses: "./.github/workflows/release.yml",
+      with: { dry_run: false },
+    });
+    expect(releaseCall?.if).toContain("needs.merge.outputs.merged_count != '0'");
   });
 });
