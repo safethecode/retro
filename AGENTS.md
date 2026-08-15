@@ -10,10 +10,30 @@ rules, but it must not weaken this contract.
 - Do not commit, push, publish, deploy, or rewrite Git history unless the user explicitly asks.
 - Preserve unrelated working-tree changes. Never use destructive cleanup commands such as
   `git clean`, `git reset --hard`, or `git checkout --`.
+- Before creating or changing anything, decide where it belongs and who owns it. Consider
+  responsibilities, boundaries, dependencies, and which files are likely to change together. Fit
+  the existing architecture, but do not use structure as a reason for speculative abstractions.
 - Prefer the smallest complete change. Do not add speculative packages, generic repositories,
   service bases, controllers, barrel files, or wrappers without a current consumer and a policy they
   enforce.
 - Do not hand-edit generated build output, `.next`, coverage, or dependency directories.
+
+## Commit messages
+
+- When the user explicitly asks for a commit, follow Karma's Angular-style format:
+  `<type>(<scope>): <subject>`. Use a lowercase type and an optional lowercase scope.
+- Use only `feat`, `fix`, `docs`, `style`, `refactor`, `test`, or `chore` as the type.
+- Write the subject and body in natural Korean. Do not translate an English draft word for word or
+  hide the actual change behind vague nouns. State what changed directly, keep the subject within 72
+  characters, and omit the final period.
+- Version bump commits are the only exception to the Korean subject rule. Use the exact format
+  `chore(bump): v<version>`.
+- Prefer concrete subjects such as `fix(ci): 깨진 pnpm 릴리스 교체`; avoid abstract wording such as
+  `fix(ci): 도구 버전 정합성 개선`.
+- Keep established technical terms in English when translating them would sound forced. Add a body
+  only when the reason is not clear from the subject, and explain the motivation and previous
+  behavior in natural Korean.
+- Put issue references and `BREAKING CHANGE:` notes in the footer after a blank line.
 
 ## Architecture
 
@@ -99,7 +119,6 @@ pnpm lint
 pnpm check-types
 pnpm test
 pnpm build
-pnpm test:e2e
 ```
 
 - Report any check that could not run and the concrete reason. Never claim completion from stale or
