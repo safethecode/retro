@@ -4,9 +4,9 @@
   "private": true,
   "engines": {
     "node": ">=24 <25",
-    "pnpm": ">=11.13.0 <12"
+    "pnpm": ">=11.21.0 <12"
   },
-  "packageManager": "pnpm@11.13.0",
+  "packageManager": "pnpm@11.21.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
