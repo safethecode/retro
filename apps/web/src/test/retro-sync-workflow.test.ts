@@ -84,8 +84,7 @@ describe("retro sync workflow", () => {
     expect(verify?.if).toContain("steps.sync.outputs.updated == 'true'");
     expect(verify?.run).toContain("pnpm install --frozen-lockfile");
     expect(verify?.run).toContain("pnpm verify");
-    expect(verify?.run).toContain("pnpm --filter web exec playwright install --with-deps chromium");
-    expect(verify?.run).toContain("pnpm --filter web exec playwright test --project=chromium");
+    expect(verify?.run).not.toContain("playwright");
     expect(verify?.env).toBeUndefined();
     expect(publish?.if).toContain("steps.sync.outputs.updated == 'true'");
     expect(publish?.env?.GH_TOKEN).toContain("github.token");

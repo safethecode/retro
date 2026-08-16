@@ -1,13 +1,27 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
+import {
+  closeSync,
+  constants,
+  existsSync,
+  lstatSync,
+  mkdtempSync,
+  openSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const DEFAULT_REMOTE_NAME = "retro";
 const DEFAULT_UPSTREAM = "https://github.com/safethecode/retro.git";
+const SYNC_STATE_PATH = ".retro-sync";
 const UPSTREAM_BRANCH = "main";
 
-function runGit(arguments_, { allowFailure = false } = {}) {
-  const result = spawnSync("git", arguments_, { encoding: "utf8" });
+function runGit(arguments_, { allowFailure = false, input } = {}) {
+  const result = spawnSync("git", arguments_, { encoding: "utf8", input });
   if (result.error) {
     throw result.error;
   }
@@ -20,6 +34,25 @@ function runGit(arguments_, { allowFailure = false } = {}) {
 
 function git(...arguments_) {
   return runGit(arguments_).stdout.trim();
+}
+
+function runGitToFile(arguments_, outputPath) {
+  const output = openSync(outputPath, "w");
+  let result;
+  try {
+    result = spawnSync("git", arguments_, {
+      encoding: "utf8",
+      stdio: ["ignore", output, "pipe"],
+    });
+  } finally {
+    closeSync(output);
+  }
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status !== 0) {
+    throw new Error(result.stderr?.trim() || "Git command failed");
+  }
 }
 
 function parseArguments(arguments_) {
@@ -98,15 +131,58 @@ function matchingSnapshot(upstreamRevision) {
   return undefined;
 }
 
+function recordedUpstream() {
+  const result = runGit(["show", `HEAD:${SYNC_STATE_PATH}`], { allowFailure: true });
+  if (result.status !== 0) {
+    return undefined;
+  }
+
+  const value = result.stdout.trim();
+  if (!/^[0-9a-f]{40}$/u.test(value)) {
+    throw new Error(`Invalid ${SYNC_STATE_PATH} value: ${value || "empty"}`);
+  }
+  return value;
+}
+
+function validateStatePath(upstreamCommit) {
+  const upstreamState = runGit(["cat-file", "-e", `${upstreamCommit}:${SYNC_STATE_PATH}`], {
+    allowFailure: true,
+  });
+  if (upstreamState.status === 0) {
+    throw new Error(`Upstream uses the reserved state path: ${SYNC_STATE_PATH}`);
+  }
+  if (!existsSync(SYNC_STATE_PATH)) {
+    return;
+  }
+
+  const trackedState = runGit(["ls-files", "--error-unmatch", "--", SYNC_STATE_PATH], {
+    allowFailure: true,
+  });
+  const state = lstatSync(SYNC_STATE_PATH);
+  if (trackedState.status !== 0 || state.isSymbolicLink() || !state.isFile()) {
+    throw new Error(`Project content exists at the reserved state path: ${SYNC_STATE_PATH}`);
+  }
+}
+
+function writeState(upstreamCommit) {
+  const descriptor = openSync(
+    SYNC_STATE_PATH,
+    constants.O_WRONLY | constants.O_CREAT | constants.O_TRUNC | constants.O_NOFOLLOW,
+    0o600,
+  );
+  try {
+    writeFileSync(descriptor, `${upstreamCommit}\n`);
+  } finally {
+    closeSync(descriptor);
+  }
+  git("add", "--force", "--", SYNC_STATE_PATH);
+}
+
 function isAncestor(ancestor, descendant) {
   return (
     runGit(["merge-base", "--is-ancestor", ancestor, descendant], { allowFailure: true }).status ===
     0
   );
-}
-
-function hasCommonHistory(left, right) {
-  return runGit(["merge-base", left, right], { allowFailure: true }).status === 0;
 }
 
 function ensureBranchDoesNotExist(branch) {
@@ -118,42 +194,56 @@ function ensureBranchDoesNotExist(branch) {
   }
 }
 
-function mergeInProgress() {
-  return runGit(["rev-parse", "--verify", "MERGE_HEAD"], { allowFailure: true }).status === 0;
+function hasUnmergedFiles() {
+  return Boolean(git("ls-files", "--unmerged"));
 }
 
 function cleanUpFailedBranch(originalBranch, syncBranch) {
-  runGit(["switch", originalBranch], { allowFailure: true });
-  runGit(["branch", "--delete", "--force", syncBranch], { allowFailure: true });
+  git("reset", "--hard", "HEAD");
+  git("switch", originalBranch);
+  git("branch", "--delete", "--force", syncBranch);
 }
 
-function mergeUpstream({ baseline, originalBranch, syncBranch, upstreamRevision }) {
+function applyUpstream({ baseline, originalBranch, syncBranch, upstreamCommit }) {
   git("switch", "--create", syncBranch);
   try {
-    if (baseline) {
-      git(
-        "merge",
-        "--allow-unrelated-histories",
-        "--strategy=ours",
-        "--no-edit",
-        "--message",
-        "chore(sync): 보일러플레이트 동기화",
-        baseline,
+    writeState(upstreamCommit);
+    const patchDirectory = mkdtempSync(join(tmpdir(), "retro-sync-patch-"));
+    const patchPath = join(patchDirectory, "update.patch");
+    try {
+      runGitToFile(
+        [
+          "diff",
+          "--binary",
+          "--full-index",
+          "--no-ext-diff",
+          "--no-textconv",
+          "--no-renames",
+          baseline,
+          upstreamCommit,
+        ],
+        patchPath,
       );
+      if (statSync(patchPath).size === 0) {
+        git("commit", "--allow-empty", "--message", "chore(sync): 보일러플레이트 동기화");
+        return;
+      }
+      const result = runGit(["apply", "--3way", "--index", "--whitespace=nowarn", patchPath], {
+        allowFailure: true,
+      });
+      if (result.status !== 0) {
+        const detail = result.stderr?.trim() || result.stdout?.trim() || "Git patch failed";
+        throw new Error(detail);
+      }
+    } finally {
+      rmSync(patchDirectory, { force: true, recursive: true });
     }
-    git(
-      "merge",
-      "--no-ff",
-      "--no-edit",
-      "--message",
-      "chore(sync): retro 최신 변경 반영",
-      upstreamRevision,
-    );
+    git("commit", "--allow-empty", "--message", "chore(sync): 보일러플레이트 동기화");
   } catch (error) {
-    if (mergeInProgress()) {
-      const detail = error instanceof Error ? error.message : "Git merge failed";
+    if (hasUnmergedFiles()) {
+      const detail = error instanceof Error ? error.message : "Git patch failed";
       throw new Error(
-        `${detail}\nResolve the conflicts on the sync branch, stage them, and run git commit.`,
+        `${detail}\nResolve the conflicts on the sync branch, stage them, and run git commit --message "chore(sync): 보일러플레이트 동기화".`,
       );
     }
     cleanUpFailedBranch(originalBranch, syncBranch);
@@ -170,20 +260,22 @@ export function syncRetro(arguments_ = process.argv.slice(2)) {
 
   const upstreamRevision = `${DEFAULT_REMOTE_NAME}/${UPSTREAM_BRANCH}`;
   const upstreamCommit = git("rev-parse", upstreamRevision);
-  if (isAncestor(upstreamCommit, "HEAD")) {
+  validateStatePath(upstreamCommit);
+  const baseline = recordedUpstream() ?? matchingSnapshot(upstreamCommit);
+  if (!baseline) {
+    throw new Error("No matching retro snapshot exists in the current branch history");
+  }
+  if (!isAncestor(baseline, upstreamCommit)) {
+    throw new Error(`Recorded retro snapshot is not available in ${upstreamRevision}: ${baseline}`);
+  }
+  if (baseline === upstreamCommit) {
     process.stdout.write("retro is already up to date\n");
     return;
   }
 
-  const related = hasCommonHistory("HEAD", upstreamCommit);
-  const baseline = related ? undefined : matchingSnapshot(upstreamRevision);
-  if (!related && !baseline) {
-    throw new Error("No matching retro snapshot exists in the current branch history");
-  }
-
   const syncBranch = `chore/retro-sync-${upstreamCommit.slice(0, 12)}`;
   ensureBranchDoesNotExist(syncBranch);
-  mergeUpstream({ baseline, originalBranch, syncBranch, upstreamRevision });
+  applyUpstream({ baseline, originalBranch, syncBranch, upstreamCommit });
   process.stdout.write(`retro updates are ready on ${syncBranch}\n`);
 }
 
