@@ -30,6 +30,12 @@ function typescriptFiles(directory: string): string[] {
 }
 
 describe("web application boundaries", () => {
+  it("disables Next.js agent instruction file generation", async () => {
+    const { default: nextConfig } = await import("../../next.config.js");
+
+    expect(nextConfig.agentRules).toBe(false);
+  });
+
   it("uses the canonical source directories", () => {
     const missing = requiredDirectories.filter(
       (directory) => !existsSync(join(sourceRoot, directory)),
