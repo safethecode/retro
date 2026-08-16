@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   merge:
+    if: github.repository == 'safethecode/retro'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -242,7 +243,7 @@ jobs:
 
   release:
     needs: merge
-    if: needs.merge.outputs.merged_count != '0'
+    if: github.repository == 'safethecode/retro' && needs.merge.outputs.merged_count != '0'
     permissions:
       contents: write
     uses: ./.github/workflows/release.yml

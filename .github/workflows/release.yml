@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   release:
+    if: github.repository == 'safethecode/retro'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

@@ -1,0 +1,118 @@
+name: Retro sync
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: retro-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository != 'safethecode/retro'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out main without stored credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: main
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+        with:
+          run_install: false
+          version: 11.21.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Synchronize retro
+        id: sync
+        run: |
+          set -euo pipefail
+          original_branch=$(git branch --show-current)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          pnpm sync:retro
+          current_branch=$(git branch --show-current)
+
+          if [[ "$current_branch" == "$original_branch" ]]; then
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+          echo "branch=$current_branch" >> "$GITHUB_OUTPUT"
+
+      - name: Set up synchronized Node.js
+        if: steps.sync.outputs.updated == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Set up synchronized pnpm
+        if: steps.sync.outputs.updated == 'true'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+        with:
+          run_install: false
+
+      - name: Verify synchronized repository
+        if: steps.sync.outputs.updated == 'true'
+        run: |
+          set -euo pipefail
+          pnpm install --frozen-lockfile
+          pnpm verify
+          pnpm --filter web exec playwright install --with-deps chromium
+          pnpm --filter web exec playwright test --project=chromium
+
+      - name: Push branch and open pull request
+        if: steps.sync.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SYNC_BRANCH: ${{ steps.sync.outputs.branch }}
+        run: |
+          set -euo pipefail
+          existing_pr=$(gh pr list --state all --head "$SYNC_BRANCH" --json url --jq '.[0].url // ""')
+          if [[ -n "$existing_pr" ]]; then
+            echo "A pull request already exists for $SYNC_BRANCH: $existing_pr"
+            exit 0
+          fi
+
+          gh auth setup-git
+          remote_sha=$(git ls-remote --heads origin "refs/heads/$SYNC_BRANCH" | awk '{print $1}')
+          push_required=true
+          push_arguments=()
+          if [[ -n "$remote_sha" ]]; then
+            git fetch origin "refs/heads/$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH"
+            local_tree=$(git rev-parse 'HEAD^{tree}')
+            remote_tree=$(git rev-parse "refs/remotes/origin/$SYNC_BRANCH^{tree}")
+            if [[ "$local_tree" == "$remote_tree" ]]; then
+              push_required=false
+            else
+              push_arguments+=("--force-with-lease=refs/heads/$SYNC_BRANCH:$remote_sha")
+            fi
+          fi
+
+          if [[ "$push_required" == "true" ]]; then
+            git push "${push_arguments[@]}" origin "HEAD:refs/heads/$SYNC_BRANCH"
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$SYNC_BRANCH" \
+            --title "chore(sync): retro 최신 변경 반영" \
+            --body "retro upstream의 최신 변경을 자동으로 동기화한 PR입니다. CI 결과와 충돌 가능성을 확인한 뒤 병합해 주세요."
