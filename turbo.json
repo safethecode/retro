@@ -6,13 +6,23 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": [
+        "NODE_ENV",
+        "AUTH_SECRET",
+        "AUTH_URL",
+        "DATABASE_URL",
+        "AUTH_GOOGLE_ID",
+        "AUTH_GOOGLE_SECRET",
+        "NEXT_PUBLIC_*"
+      ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
     "analyze": {
-      "dependsOn": ["^analyze"]
+      "dependsOn": ["^analyze"],
+      "cache": false
     },
     "dev": {
       "cache": false,

@@ -1,16 +1,18 @@
 import type { NextRequest } from "next/server";
 import { AppError, toErrorResponse } from "./app-error";
 
-type RouteContext<T extends Record<string, string> = Record<string, string>> = {
+type RouteParams = Record<string, string | string[]>;
+
+type RouteContext<T extends RouteParams = RouteParams> = {
   params: Promise<T>;
 };
 
-type RouteHandler<T extends Record<string, string> = Record<string, string>> = (
+type RouteHandler<T extends RouteParams = RouteParams> = (
   request: NextRequest,
   context: RouteContext<T>,
 ) => Promise<Response>;
 
-export function withErrorHandler<T extends Record<string, string> = Record<string, string>>(
+export function withErrorHandler<T extends RouteParams = RouteParams>(
   handler: RouteHandler<T>,
 ): RouteHandler<T> {
   return async (request, context) => {

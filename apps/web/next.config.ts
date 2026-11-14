@@ -1,4 +1,4 @@
-import bundleAnalyzer from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -33,15 +33,14 @@ const securityHeaders = [
       ]),
 ];
 
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
-
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   agentRules: false,
+  reactCompiler: true,
+  cacheComponents: true,
+  partialPrefetching: true,
+  typedRoutes: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
@@ -55,4 +54,4 @@ const nextConfig = {
   },
 };
 
-export default withBundleAnalyzer(withNextIntl(nextConfig));
+export default withNextIntl(nextConfig);

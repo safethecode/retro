@@ -1,6 +1,9 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
-import { Link } from "@/i18n";
+import { env } from "@/config/env";
+import { Link, routing } from "@/i18n";
 import { LoginForm } from "@/modules/auth";
 
 type LoginPageProps = {
@@ -9,9 +12,9 @@ type LoginPageProps = {
 
 export default async function LoginPage({ params }: LoginPageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  if (!hasLocale(routing.locales, locale)) notFound();
 
-  const t = await getTranslations("auth");
+  const t = await getTranslations({ locale, namespace: "auth" });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
@@ -20,7 +23,7 @@ export default async function LoginPage({ params }: LoginPageProps) {
           <h1 className="text-2xl font-bold">{t("login")}</h1>
         </div>
         <Suspense fallback={<LoginFormSkeleton />}>
-          <LoginForm />
+          <LoginForm googleEnabled={Boolean(env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET)} />
         </Suspense>
         <p className="text-center text-sm text-gray-600">
           {t("noAccount")}{" "}

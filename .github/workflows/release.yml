@@ -19,6 +19,12 @@ concurrency:
   group: weekly-release
   cancel-in-progress: false
 
+env:
+  AUTH_SECRET: ci-build-and-test-only-f91a482d63c80e75b94a1270
+  AUTH_URL: http://localhost:3187
+  DATABASE_URL: postgresql://retro:retro@127.0.0.1:5432/retro_test
+  NEXT_PUBLIC_SITE_URL: http://localhost:3187
+
 jobs:
   release:
     if: github.repository == 'safethecode/retro'
@@ -32,7 +38,7 @@ jobs:
           ref: main
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115
         with:
           run_install: false
           version: 11.21.0

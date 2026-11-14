@@ -1,5 +1,8 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n";
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { Link, routing } from "@/i18n";
+import { RegisterForm } from "@/modules/auth";
 
 type RegisterPageProps = {
   params: Promise<{ locale: string }>;
@@ -7,9 +10,9 @@ type RegisterPageProps = {
 
 export default async function RegisterPage({ params }: RegisterPageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  if (!hasLocale(routing.locales, locale)) notFound();
 
-  const t = await getTranslations("auth");
+  const t = await getTranslations({ locale, namespace: "auth" });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
@@ -17,7 +20,7 @@ export default async function RegisterPage({ params }: RegisterPageProps) {
         <div className="text-center">
           <h1 className="text-2xl font-bold">{t("register")}</h1>
         </div>
-        <p className="text-center text-gray-500">회원가입 폼이 여기에 표시됩니다.</p>
+        <RegisterForm />
         <p className="text-center text-sm text-gray-600">
           {t("hasAccount")}{" "}
           <Link href="/login" className="text-black underline">

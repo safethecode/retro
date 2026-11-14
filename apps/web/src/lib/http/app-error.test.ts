@@ -48,6 +48,19 @@ describe("toErrorResponse", () => {
 });
 
 describe("parseJson", () => {
+  it("limits actual body bytes even when Content-Length is misleading", async () => {
+    const request = new Request("https://example.com", {
+      method: "POST",
+      headers: { "Content-Length": "1" },
+      body: JSON.stringify({ name: "x".repeat(64 * 1024) }),
+    });
+
+    await expect(parseJson(request, z.object({ name: z.string() }))).rejects.toMatchObject({
+      code: "PAYLOAD_TOO_LARGE",
+      status: 413,
+    });
+  });
+
   it("maps malformed JSON to a safe client error", async () => {
     const request = new Request("https://example.com", {
       method: "POST",

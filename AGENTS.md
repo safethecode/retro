@@ -43,7 +43,7 @@ rules, but it must not weaken this contract.
   thin.
 - `apps/web/src/modules/<name>` owns one business capability. Components, schemas, actions, and
   server code that change together stay in that module.
-- A module root exports only client-safe public APIs. Put secrets, database access, Auth.js setup,
+- A module root exports only client-safe public APIs. Put secrets, database access, authentication setup,
   and other privileged code below `modules/<name>/server`; every server entry point starts with
   `import "server-only"`.
 - `components`, `config`, `i18n`, and `lib` are domain-neutral. They must never import from

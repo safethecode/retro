@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Home Page", () => {
+  test("should match the document language to the route locale", async ({ page }) => {
+    await page.goto("/en");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await page.goto("/ko");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ko");
+  });
+
   test("should display welcome message", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("h1")).toBeVisible();
