@@ -30,6 +30,14 @@ function typescriptFiles(directory: string): string[] {
 }
 
 describe("web application boundaries", () => {
+  it("analyzes the same Turbopack bundles used by production builds", () => {
+    const manifest = JSON.parse(readFileSync(join(appRoot, "package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    };
+
+    expect(manifest.scripts.analyze).toBe("next experimental-analyze");
+  });
+
   it("generates route types before checking application types", async () => {
     const { default: nextConfig } = await import("../../next.config");
     const manifest = JSON.parse(readFileSync(join(appRoot, "package.json"), "utf8")) as {

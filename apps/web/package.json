@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev --turbopack --port 3000",
     "build": "next build",
-    "analyze": "ANALYZE=true next build",
+    "analyze": "next experimental-analyze",
     "start": "next start",
     "check-types": "next typegen && tsc --noEmit",
     "test": "vitest",
@@ -28,7 +28,6 @@
     "zustand": "^5.1.0"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.4.6",
     "@playwright/test": "^1.65.0",
     "@repo/typescript-config": "workspace:*",
     "@repo/ui": "workspace:*",

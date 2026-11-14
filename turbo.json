@@ -12,7 +12,8 @@
       "dependsOn": ["^check-types"]
     },
     "analyze": {
-      "dependsOn": ["^analyze"]
+      "dependsOn": ["^analyze"],
+      "cache": false
     },
     "dev": {
       "cache": false,
