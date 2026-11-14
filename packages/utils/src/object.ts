@@ -34,21 +34,30 @@ export function deepMerge<T extends Record<string, unknown>>(
   target: T,
   ...sources: Partial<T>[]
 ): T {
-  if (!sources.length) return target;
-  const source = sources.shift();
+  for (const source of sources) {
+    if (isObject(source)) mergeRecord(target, source);
+  }
+  return target;
+}
 
-  if (isObject(target) && isObject(source)) {
-    for (const key in source) {
-      if (isObject(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: {} });
-        deepMerge(target[key] as Record<string, unknown>, source[key] as Record<string, unknown>);
-      } else {
-        Object.assign(target, { [key]: source[key] });
-      }
+const unsafeObjectKeys = new Set(["__proto__", "constructor", "prototype"]);
+
+function assertSafeKey(key: string): void {
+  if (unsafeObjectKeys.has(key)) throw new TypeError("Unsafe object key");
+}
+
+function mergeRecord(target: Record<string, unknown>, source: Record<string, unknown>): void {
+  for (const [key, value] of Object.entries(source)) {
+    assertSafeKey(key);
+    if (isObject(value)) {
+      const current = target[key];
+      const nested = Object.hasOwn(target, key) && isObject(current) ? current : {};
+      mergeRecord(nested, value);
+      target[key] = nested;
+    } else {
+      target[key] = value;
     }
   }
-
-  return deepMerge(target, ...sources);
 }
 
 function isObject(item: unknown): item is Record<string, unknown> {
@@ -76,13 +85,14 @@ export function getNestedValue<T>(
 
 export function setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split(".");
+  for (const key of keys) assertSafeKey(key);
   const lastKey = keys.pop();
   if (!lastKey) return;
 
   let current: Record<string, unknown> = obj;
 
   for (const key of keys) {
-    if (!(key in current) || typeof current[key] !== "object") {
+    if (!Object.hasOwn(current, key) || current[key] === null || typeof current[key] !== "object") {
       current[key] = {};
     }
     current = current[key] as Record<string, unknown>;
