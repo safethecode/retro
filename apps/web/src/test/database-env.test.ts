@@ -17,6 +17,9 @@ describe("database CLI environment", () => {
       for (const mode of ["development", "production"]) {
         writeFileSync(join(directory, `.env.${mode}`), `RETRO_DB_ENV_TEST=${mode}\n`);
       }
+      const childEnvironment = { ...process.env, RETRO_DB_ENV_TEST: undefined };
+      Reflect.deleteProperty(childEnvironment, "NODE_ENV");
+      if (nodeEnv === "production") childEnvironment.NODE_ENV = nodeEnv;
       const result = execFileSync(
         process.execPath,
         [
@@ -26,7 +29,7 @@ describe("database CLI environment", () => {
         ],
         {
           cwd: directory,
-          env: { ...process.env, NODE_ENV: nodeEnv, RETRO_DB_ENV_TEST: undefined },
+          env: childEnvironment,
           encoding: "utf8",
         },
       );
