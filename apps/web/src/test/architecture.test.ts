@@ -30,6 +30,18 @@ function typescriptFiles(directory: string): string[] {
 }
 
 describe("web application boundaries", () => {
+  it("keeps Proxy independent from App Router locale navigation", () => {
+    const source = readFileSync(join(sourceRoot, "proxy.ts"), "utf8");
+    expect(source).not.toMatch(/from ["']@\/i18n["']/);
+    expect(source).toContain('from "@/i18n/routing"');
+  });
+
+  it("enables Cache Components for public content and streamed private views", async () => {
+    const { default: nextConfig } = await import("../../next.config");
+    expect(nextConfig.cacheComponents).toBe(true);
+    expect(nextConfig.partialPrefetching).toBe(true);
+  });
+
   it("analyzes the same Turbopack bundles used by production builds", () => {
     const manifest = JSON.parse(readFileSync(join(appRoot, "package.json"), "utf8")) as {
       scripts: Record<string, string>;
@@ -69,7 +81,7 @@ describe("web application boundaries", () => {
   });
 
   it("keeps domain-neutral layers independent from modules", () => {
-    const neutralLayers = ["components", "config", "lib"];
+    const neutralLayers = ["components", "config", "i18n", "lib"];
     const violations = neutralLayers.flatMap((layer) =>
       typescriptFiles(join(sourceRoot, layer)).flatMap((file) => {
         const source = readFileSync(file, "utf8");
@@ -81,16 +93,26 @@ describe("web application boundaries", () => {
   });
 
   it("marks module server entry points as server-only", () => {
-    const serverEntry = readFileSync(join(sourceRoot, "modules/auth/server/index.ts"), "utf8");
-
-    expect(serverEntry).toMatch(/^import "server-only";/);
+    const entries = [
+      "modules/auth/server/index.ts",
+      "modules/auth/server/auth.ts",
+      "modules/auth/server/session.ts",
+      "lib/db.ts",
+    ];
+    for (const entry of entries) {
+      expect(readFileSync(join(sourceRoot, entry), "utf8"), entry).toMatch(
+        /^import "server-only";/,
+      );
+    }
   });
 
   it("keeps server-only modules out of client components", () => {
     const violations = typescriptFiles(sourceRoot).flatMap((file) => {
       const source = readFileSync(file, "utf8");
       const isClientComponent = source.startsWith('"use client"');
-      const importsServerEntry = /from\s+["']@\/modules\/[^"']+\/server["']/.test(source);
+      const importsServerEntry = /from\s+["']@\/modules\/[^"']+\/server(?:\/[^"']+)?["']/.test(
+        source,
+      );
 
       return isClientComponent && importsServerEntry ? [relative(appRoot, file)] : [];
     });

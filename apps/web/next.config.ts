@@ -38,6 +38,8 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   agentRules: false,
   reactCompiler: true,
+  cacheComponents: true,
+  partialPrefetching: true,
   typedRoutes: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { env } from "@/config/env";
 import { Link, routing } from "@/i18n";
@@ -13,9 +13,8 @@ type LoginPageProps = {
 export default async function LoginPage({ params }: LoginPageProps) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  setRequestLocale(locale);
 
-  const t = await getTranslations("auth");
+  const t = await getTranslations({ locale, namespace: "auth" });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">

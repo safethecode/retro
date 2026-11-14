@@ -28,7 +28,7 @@ test("registers a persistent account, protects its profile, and signs in again",
   await page.getByLabel("Confirm Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Register", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/dashboard$/);
-  await expect(page.getByRole("heading")).toContainText("Retro User");
+  await expect(page.getByRole("heading", { level: 2 })).toContainText("Retro User");
   const sessionCookie = (await page.context().cookies()).find((cookie) =>
     cookie.name.endsWith("better-auth.session_token"),
   );
@@ -54,7 +54,7 @@ test("registers a persistent account, protects its profile, and signs in again",
   });
   expect(updated.status()).toBe(200);
   await page.reload();
-  await expect(page.getByRole("heading")).toContainText("Updated User");
+  await expect(page.getByRole("heading", { level: 2 })).toContainText("Updated User");
 
   await page.getByRole("button", { name: "Logout" }).click();
   await expect(page).toHaveURL(/\/en$/);
@@ -65,5 +65,5 @@ test("registers a persistent account, protects its profile, and signs in again",
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Login", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/dashboard$/);
-  await expect(page.getByRole("heading")).toContainText("Updated User");
+  await expect(page.getByRole("heading", { level: 2 })).toContainText("Updated User");
 });

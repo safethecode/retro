@@ -129,6 +129,13 @@ before exposing the origin so authentication request limits use trusted client a
 
 ## CI
 
+Cache Components and Partial Prefetching are enabled. The public welcome heading is cached by
+locale, while database session reads and personalized dashboard content remain behind Suspense.
+The locale root layout sets the document language, and `next/root-params` supplies the server
+locale without a request-header dependency. Proxy imports only routing configuration so App
+Router navigation code stays out of its runtime. Browser tests verify that two accounts never
+share personalized content across cached page renders.
+
 Unit and contract tests run in the Node Vitest project, while `.test.tsx` component tests run in
 the DOM project. `@repo/utils` has its own Node tests. HTTP contract tests use MSW without a live
 API server. `pnpm check-types` generates Next.js route types before running TypeScript.

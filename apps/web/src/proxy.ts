@@ -1,5 +1,5 @@
 import createIntlMiddleware from "next-intl/middleware";
-import { routing } from "@/i18n";
+import { routing } from "@/i18n/routing";
 
 const handleI18nRouting = createIntlMiddleware(routing);
 const publicPages = new Set(["/", "/login", "/register"]);
