@@ -14,6 +14,18 @@ const manifests = [
 type Manifest = { dependencies?: Record<string, string>; devDependencies?: Record<string, string> };
 
 describe("workspace dependency policy", () => {
+  it("keeps automatic Node type updates within the selected runtime major", () => {
+    const config = parse(readFileSync(join(repositoryRoot, ".github/dependabot.yml"), "utf8")) as {
+      updates: Array<{ "package-ecosystem": string; ignore?: Array<Record<string, unknown>> }>;
+    };
+    expect(
+      config.updates.find((update) => update["package-ecosystem"] === "npm")?.ignore,
+    ).toContainEqual({
+      "dependency-name": "@types/node",
+      "update-types": ["version-update:semver-major"],
+    });
+  });
+
   it("invalidates production build caches when authentication configuration changes", () => {
     const config = JSON.parse(readFileSync(join(repositoryRoot, "turbo.json"), "utf8")) as {
       tasks: { build: { env?: string[] } };
@@ -34,7 +46,10 @@ describe("workspace dependency policy", () => {
       catalog?: Record<string, string>;
     };
     expect(workspace.catalog).toBeDefined();
-    expect(workspace.catalog?.["@types/node"]).toMatch(/^\^?24\./);
+    const nodeMajor = readFileSync(join(repositoryRoot, ".node-version"), "utf8")
+      .trim()
+      .split(".")[0];
+    expect(workspace.catalog?.["@types/node"]).toMatch(new RegExp(`^\\^?${nodeMajor}\\.`));
 
     for (const path of manifests) {
       const manifest = JSON.parse(readFileSync(join(repositoryRoot, path), "utf8")) as Manifest;
