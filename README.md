@@ -59,18 +59,18 @@ the complete contribution contract.
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `pnpm dev` | Start workspace development tasks |
-| `pnpm build` | Build all buildable workspaces |
-| `pnpm lint` | Run Biome checks without changing files |
-| `pnpm lint:fix` | Apply safe Biome fixes |
-| `pnpm format` | Format supported files |
-| `pnpm check-types` | Type-check every package |
-| `pnpm test` | Run unit and architecture tests |
-| `pnpm test:e2e` | Run Playwright browser tests |
-| `pnpm verify` | Run lint, types, unit tests, and production builds |
-| `pnpm ui:update` | Refresh shadcn/ui sources intentionally |
+| Command            | Purpose                                            |
+| ------------------ | -------------------------------------------------- |
+| `pnpm dev`         | Start workspace development tasks                  |
+| `pnpm build`       | Build all buildable workspaces                     |
+| `pnpm lint`        | Run Biome checks without changing files            |
+| `pnpm lint:fix`    | Apply safe Biome fixes                             |
+| `pnpm format`      | Format supported files                             |
+| `pnpm check-types` | Type-check every package                           |
+| `pnpm test`        | Run unit and architecture tests                    |
+| `pnpm test:e2e`    | Run Playwright browser tests                       |
+| `pnpm verify`      | Run lint, types, unit tests, and production builds |
+| `pnpm ui:update`   | Refresh shadcn/ui sources intentionally            |
 
 Run `pnpm exec playwright install` once before the first local end-to-end test.
 
