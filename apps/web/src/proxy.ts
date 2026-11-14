@@ -1,3 +1,5 @@
+import { getSessionCookie } from "better-auth/cookies";
+import type { NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 
@@ -30,6 +32,3 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
-
-import { getSessionCookie } from "better-auth/cookies";
-import type { NextRequest } from "next/server";
