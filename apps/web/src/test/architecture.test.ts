@@ -30,6 +30,12 @@ function typescriptFiles(directory: string): string[] {
 }
 
 describe("web application boundaries", () => {
+  it("enables React Compiler for application components", async () => {
+    const { default: nextConfig } = await import("../../next.config.js");
+
+    expect(nextConfig.reactCompiler).toBe(true);
+  });
+
   it("disables Next.js agent instruction file generation", async () => {
     const { default: nextConfig } = await import("../../next.config.js");
 

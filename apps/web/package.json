@@ -39,6 +39,7 @@
     "@vitejs/plugin-react": "^6.3.0",
     "@vitest/coverage-v8": "catalog:",
     "autoprefixer": "^10.6.2",
+    "babel-plugin-react-compiler": "1.0.0",
     "jsdom": "^31.0.1",
     "postcss": "catalog:",
     "tailwindcss": "catalog:",

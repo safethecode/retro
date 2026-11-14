@@ -42,6 +42,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   agentRules: false,
+  reactCompiler: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
