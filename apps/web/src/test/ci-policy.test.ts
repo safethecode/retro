@@ -24,6 +24,9 @@ describe("CI verification policy", () => {
     }
 
     const commands = workflow.jobs.e2e?.steps.flatMap((step) => step.run ?? []) ?? [];
+    expect(workflow.jobs.verify?.steps.map((step) => step.run)).toContain(
+      "pnpm audit --audit-level high",
+    );
     expect(commands.indexOf("pnpm build")).toBeGreaterThan(-1);
     expect(commands.indexOf("pnpm build")).toBeLessThan(
       commands.findIndex((command) => command.includes("playwright test")),

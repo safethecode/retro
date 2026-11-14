@@ -4,6 +4,8 @@ packages:
 overrides:
   # GHSA-67mh-4wv8-2f99: patch Drizzle Kit's legacy loader; verify generate/migrate.
   "@esbuild-kit/core-utils>esbuild": "^0.25.12"
+  # GHSA-rj75-hqrm-r3gf: Typography pins an affected selector parser.
+  "@tailwindcss/typography>postcss-selector-parser": "^6.1.6"
 allowBuilds:
   "@parcel/watcher": true
   "@swc/core": true

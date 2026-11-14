@@ -142,6 +142,6 @@ API server. `pnpm check-types` generates Next.js route types before running Type
 
 GitHub Actions installs with the frozen lockfile and runs static analysis, type checks, unit tests,
 the production build, and Playwright journeys against PostgreSQL 18. CI uses public test-only
-environment values, read-only verification credentials, pinned Actions, and a production dependency
+environment values, read-only verification credentials, pinned Actions, and a full dependency
 audit. Dependency updates are managed by the existing
 Dependabot configuration.
