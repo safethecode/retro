@@ -1,5 +1,8 @@
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { routing } from "@/i18n";
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -7,6 +10,7 @@ type HomePageProps = {
 
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
   const t = await getTranslations("home");

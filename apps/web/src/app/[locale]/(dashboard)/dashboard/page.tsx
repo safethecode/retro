@@ -1,7 +1,9 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { redirect, routing } from "@/i18n";
 import { SignOutButton } from "@/modules/auth";
-import { auth } from "@/modules/auth/server";
+import { getSession } from "@/modules/auth/server";
 
 type DashboardPageProps = {
   params: Promise<{ locale: string }>;
@@ -9,12 +11,13 @@ type DashboardPageProps = {
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
-  const session = await auth();
+  const session = await getSession();
 
   if (!session?.user) {
-    redirect("/login");
+    return redirect({ href: "/login", locale });
   }
 
   const t = await getTranslations("dashboard");

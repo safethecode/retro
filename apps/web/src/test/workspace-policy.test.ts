@@ -14,6 +14,21 @@ const manifests = [
 type Manifest = { dependencies?: Record<string, string>; devDependencies?: Record<string, string> };
 
 describe("workspace dependency policy", () => {
+  it("invalidates production build caches when authentication configuration changes", () => {
+    const config = JSON.parse(readFileSync(join(repositoryRoot, "turbo.json"), "utf8")) as {
+      tasks: { build: { env?: string[] } };
+    };
+    expect(config.tasks.build.env).toEqual(
+      expect.arrayContaining([
+        "AUTH_SECRET",
+        "AUTH_URL",
+        "DATABASE_URL",
+        "AUTH_GOOGLE_ID",
+        "AUTH_GOOGLE_SECRET",
+      ]),
+    );
+  });
+
   it("shares dependency versions through catalogs and matches Node types to the runtime", () => {
     const workspace = parse(readFileSync(join(repositoryRoot, "pnpm-workspace.yaml"), "utf8")) as {
       catalog?: Record<string, string>;

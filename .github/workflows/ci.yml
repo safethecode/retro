@@ -12,6 +12,12 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  AUTH_SECRET: ci-build-and-test-only-f91a482d63c80e75b94a1270
+  AUTH_URL: http://localhost:3187
+  DATABASE_URL: postgresql://retro:retro@127.0.0.1:5432/retro_test
+  NEXT_PUBLIC_SITE_URL: http://localhost:3187
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -33,6 +39,20 @@ jobs:
       - run: pnpm audit --prod --audit-level high
 
   e2e:
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: retro
+          POSTGRES_PASSWORD: retro
+          POSTGRES_DB: retro_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U retro -d retro_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -49,5 +69,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm db:migrate
       - run: pnpm build
       - run: pnpm --filter web exec playwright test --project=chromium

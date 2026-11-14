@@ -1,11 +1,10 @@
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n";
-import { auth } from "@/modules/auth/server";
 
 const handleI18nRouting = createIntlMiddleware(routing);
 const publicPages = new Set(["/", "/login", "/register"]);
 
-export const proxy = auth((request) => {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const locale = routing.locales.find(
     (candidate) => pathname === `/${candidate}` || pathname.startsWith(`/${candidate}/`),
@@ -18,7 +17,7 @@ export const proxy = auth((request) => {
     pathname,
   );
 
-  if (!publicPages.has(pathnameWithoutLocale) && !request.auth) {
+  if (!publicPages.has(pathnameWithoutLocale) && !getSessionCookie(request)) {
     const loginUrl = new URL(`/${locale ?? routing.defaultLocale}/login`, request.url);
     loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
 
@@ -26,8 +25,11 @@ export const proxy = auth((request) => {
   }
 
   return handleI18nRouting(request);
-});
+}
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
+
+import { getSessionCookie } from "better-auth/cookies";
+import type { NextRequest } from "next/server";

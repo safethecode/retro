@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const isCI = Boolean(process.env.CI);
 const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
-const baseURL = "http://127.0.0.1:3100";
+const baseURL = "http://localhost:3187";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -35,8 +35,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm start --hostname 127.0.0.1 --port 3100",
-    url: baseURL,
+    command: "pnpm start --hostname localhost --port 3187",
+    url: `${baseURL}/api/v1/health`,
     reuseExistingServer: false,
     env: {
       AUTH_SECRET: process.env.AUTH_SECRET ?? "playwright-only-secret-not-for-production",

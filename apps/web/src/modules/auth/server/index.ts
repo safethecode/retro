@@ -1,4 +1,4 @@
 import "server-only";
 
-export { auth, handlers, signIn, signOut } from "./auth";
-export { authConfig } from "./auth.config";
+export { auth } from "./auth";
+export { getSession, requireSession } from "./session";

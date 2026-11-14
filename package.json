@@ -20,7 +20,9 @@
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "test:e2e": "turbo run test:e2e",
-    "verify": "pnpm lint && pnpm check-types && pnpm test && pnpm build"
+    "verify": "pnpm lint && pnpm check-types && pnpm test && pnpm build",
+    "db:generate": "pnpm --filter web db:generate",
+    "db:migrate": "pnpm --filter web db:migrate"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.7",
