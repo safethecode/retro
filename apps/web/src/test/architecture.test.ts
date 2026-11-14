@@ -30,14 +30,24 @@ function typescriptFiles(directory: string): string[] {
 }
 
 describe("web application boundaries", () => {
+  it("generates route types before checking application types", async () => {
+    const { default: nextConfig } = await import("../../next.config");
+    const manifest = JSON.parse(readFileSync(join(appRoot, "package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    };
+
+    expect(nextConfig.typedRoutes).toBe(true);
+    expect(manifest.scripts["check-types"]).toBe("next typegen && tsc --noEmit");
+  });
+
   it("enables React Compiler for application components", async () => {
-    const { default: nextConfig } = await import("../../next.config.js");
+    const { default: nextConfig } = await import("../../next.config");
 
     expect(nextConfig.reactCompiler).toBe(true);
   });
 
   it("disables Next.js agent instruction file generation", async () => {
-    const { default: nextConfig } = await import("../../next.config.js");
+    const { default: nextConfig } = await import("../../next.config");
 
     expect(nextConfig.agentRules).toBe(false);
   });

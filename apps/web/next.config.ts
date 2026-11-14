@@ -1,4 +1,5 @@
 import bundleAnalyzer from "@next/bundle-analyzer";
+import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -39,10 +40,10 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   agentRules: false,
   reactCompiler: true,
+  typedRoutes: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },

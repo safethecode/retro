@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { type FormEvent, useState } from "react";
@@ -33,7 +34,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push(callbackUrl);
+      router.push(callbackUrl as Route);
       router.refresh();
     } catch {
       setError("로그인 중 오류가 발생했습니다");
