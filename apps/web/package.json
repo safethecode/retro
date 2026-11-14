@@ -40,6 +40,7 @@
     "autoprefixer": "^10.6.2",
     "babel-plugin-react-compiler": "1.0.0",
     "jsdom": "^31.0.1",
+    "msw": "3.0.5",
     "postcss": "catalog:",
     "tailwindcss": "catalog:",
     "vitest": "catalog:",

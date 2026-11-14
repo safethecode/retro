@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { env } from "@/config/env";
 
 type RequestConfig = RequestInit & {
@@ -10,10 +11,12 @@ export type ApiResult<T> =
   | { success: true; data: T }
   | { success: false; error: ApiError; status: number };
 
-const BASE_URL = env.NEXT_PUBLIC_API_URL ?? "";
+const BASE_URL = env.NEXT_PUBLIC_API_URL ?? `${env.NEXT_PUBLIC_SITE_URL}/api/v1/`;
+const responseSchema = z.object({ data: z.unknown() });
 
 function buildUrl(endpoint: string, params?: Record<string, string>): string {
-  const url = new URL(endpoint, BASE_URL || window.location.origin);
+  const baseUrl = BASE_URL.endsWith("/") ? BASE_URL : `${BASE_URL}/`;
+  const url = new URL(endpoint.replace(/^\/+/, ""), baseUrl);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       url.searchParams.set(key, value);
@@ -46,8 +49,16 @@ async function request<T>(endpoint: string, config: RequestConfig = {}): Promise
       };
     }
 
-    const payload = (await response.json()) as { data: T };
-    return { success: true, data: payload.data };
+    const payload: unknown = await response.json().catch(() => undefined);
+    const parsed = responseSchema.safeParse(payload);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: { code: "INVALID_RESPONSE", message: "Invalid server response" },
+        status: response.status,
+      };
+    }
+    return { success: true, data: parsed.data.data as T };
   } catch {
     return {
       success: false,
