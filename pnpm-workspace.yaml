@@ -1,6 +1,9 @@
 packages:
   - "apps/*"
   - "packages/*"
+overrides:
+  # GHSA-67mh-4wv8-2f99: patch Drizzle Kit's legacy loader; verify generate/migrate.
+  "@esbuild-kit/core-utils>esbuild": "^0.25.12"
 allowBuilds:
   "@parcel/watcher": true
   "@swc/core": true
@@ -18,5 +21,6 @@ catalog:
   "react-dom": "^19.3.1"
   "tailwindcss": "^4.3.5"
   "typescript": "7.0.2"
+  "vite": "^8.1.6"
   "vitest": "5.1.0"
   "zod": "^4.6.7"
