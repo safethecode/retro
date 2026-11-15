@@ -2,8 +2,27 @@ packages:
   - "apps/*"
   - "packages/*"
 overrides:
-  postcss: 8.5.19
+  # GHSA-67mh-4wv8-2f99: patch Drizzle Kit's legacy loader; verify generate/migrate.
+  "@esbuild-kit/core-utils>esbuild": "^0.25.12"
+  # GHSA-rj75-hqrm-r3gf: Typography pins an affected selector parser.
+  "@tailwindcss/typography>postcss-selector-parser": "^6.1.6"
 allowBuilds:
   "@parcel/watcher": true
   "@swc/core": true
+  esbuild: true
   sharp: true
+catalog:
+  "@tailwindcss/postcss": "^4.3.5"
+  "@types/node": "^24.19.2"
+  "@types/react": "^19.3.0"
+  "@types/react-dom": "^19.3.0"
+  "@vitest/coverage-v8": "5.1.0"
+  "lucide-react": "^1.72.0"
+  "postcss": "^8.5.32"
+  "react": "^19.3.1"
+  "react-dom": "^19.3.1"
+  "tailwindcss": "^4.3.5"
+  "typescript": "7.0.2"
+  "vite": "^8.1.6"
+  "vitest": "5.1.0"
+  "zod": "^4.6.7"

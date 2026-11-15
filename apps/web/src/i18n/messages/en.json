@@ -25,7 +25,14 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "signInWithGoogle": "Continue with Google",
-    "or": "or"
+    "or": "or",
+    "invalidForm": "Please check the form fields",
+    "invalidCredentials": "Please check your email and password",
+    "loginError": "Unable to sign in. Please try again",
+    "loggingIn": "Signing in…",
+    "registering": "Creating account…",
+    "registerError": "Unable to register. Please check your details",
+    "logoutError": "Unable to sign out. Please try again"
   },
   "home": {
     "title": "Home",

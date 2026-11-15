@@ -18,6 +18,9 @@ updates:
 
   - package-ecosystem: "npm"
     directory: "/"
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     patterns:
       - "*"
     multi-ecosystem-group: "weekly-dependencies"

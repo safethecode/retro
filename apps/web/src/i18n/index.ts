@@ -3,7 +3,7 @@ export {
   getPathname,
   Link,
   redirect,
-  routing,
   usePathname,
   useRouter,
-} from "./routing";
+} from "./navigation";
+export { routing } from "./routing";

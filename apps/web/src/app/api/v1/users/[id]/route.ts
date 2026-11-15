@@ -1,44 +1,30 @@
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { parseJson, withErrorHandler } from "@/lib/http";
+import { AppError, parseJson, withErrorHandler } from "@/lib/http";
+import { auth, requireSession } from "@/modules/auth/server";
 
-const paramsSchema = z.object({
-  id: z.string().uuid(),
-});
+const paramsSchema = z.object({ id: z.uuid() });
+const updateSchema = z.strictObject({ name: z.string().trim().min(1).max(100) });
 
-const updateUserBodySchema = z.object({
-  email: z.string().email().optional(),
-  name: z.string().min(1).max(100).optional(),
-});
-
-export const GET = withErrorHandler<{ id: string }>(async (_request: NextRequest, context) => {
+export const GET = withErrorHandler<{ id: string }>(async (request: NextRequest, context) => {
+  const session = await requireSession(request.headers);
   const { id } = paramsSchema.parse(await context.params);
-
-  const user = {
-    id,
-    email: "user@example.com",
-    name: "Example User",
-    createdAt: new Date().toISOString(),
-  };
-
-  return Response.json({ data: user });
+  if (session.user.id !== id) throw new AppError("FORBIDDEN", 403, "Access denied");
+  return Response.json(
+    { data: session.user },
+    { headers: { "Cache-Control": "private, no-store" } },
+  );
 });
 
 export const PUT = withErrorHandler<{ id: string }>(async (request: NextRequest, context) => {
+  const session = await requireSession(request.headers);
   const { id } = paramsSchema.parse(await context.params);
-  const body = await parseJson(request, updateUserBodySchema);
-
-  const updatedUser = {
-    id,
-    ...body,
-    updatedAt: new Date().toISOString(),
-  };
-
-  return Response.json({ data: updatedUser });
-});
-
-export const DELETE = withErrorHandler<{ id: string }>(async (_request: NextRequest, context) => {
-  paramsSchema.parse(await context.params);
-
-  return Response.json({ data: { deleted: true } });
+  if (session.user.id !== id) throw new AppError("FORBIDDEN", 403, "Access denied");
+  const body = await parseJson(request, updateSchema);
+  await auth.api.updateUser({ headers: request.headers, body });
+  const updated = await requireSession(request.headers);
+  return Response.json(
+    { data: updated.user },
+    { headers: { "Cache-Control": "private, no-store" } },
+  );
 });

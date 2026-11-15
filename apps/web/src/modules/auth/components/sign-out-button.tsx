@@ -1,21 +1,41 @@
 "use client";
 
-import { signOut } from "next-auth/react";
-import type { ReactNode } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { type ReactNode, useState } from "react";
+import { getPathname } from "@/i18n";
+import { authClient } from "../client";
 
-type SignOutButtonProps = {
-  children?: ReactNode;
-  className?: string;
-};
+type SignOutButtonProps = { children?: ReactNode; className?: string };
 
-export function SignOutButton({ children = "로그아웃", className }: SignOutButtonProps) {
+export function SignOutButton({ children, className }: SignOutButtonProps) {
+  const t = useTranslations("auth");
+  const locale = useLocale();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+
   async function handleSignOut() {
-    await signOut({ callbackUrl: "/" });
+    setIsLoading(true);
+    setError(false);
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        setError(true);
+        return;
+      }
+      window.location.assign(getPathname({ href: "/", locale }));
+    } catch {
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
-    <button type="button" onClick={handleSignOut} className={className}>
-      {children}
-    </button>
+    <>
+      <button type="button" onClick={handleSignOut} disabled={isLoading} className={className}>
+        {children ?? t("logout")}
+      </button>
+      {error && <p role="alert">{t("logoutError")}</p>}
+    </>
   );
 }

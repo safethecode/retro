@@ -1,5 +1,6 @@
 export { safeCallbackUrl } from "./callback-url";
 export { LoginForm } from "./components/login-form";
+export { RegisterForm } from "./components/register-form";
 export { SignOutButton } from "./components/sign-out-button";
 export type { LoginInput, RegisterInput } from "./schemas/auth.schema";
 export { loginSchema, registerSchema } from "./schemas/auth.schema";
