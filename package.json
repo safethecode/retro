@@ -25,11 +25,11 @@
     "db:migrate": "pnpm --filter web db:migrate"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.7",
+    "@biomejs/biome": "2.6.8",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "turbo": "^2.11.11",
+    "turbo": "^2.11.13",
     "typescript": "catalog:"
   }
 }
